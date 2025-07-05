@@ -4,6 +4,9 @@ app.whenReady().then(() => {
   const mainWindow = new BrowserWindow({
     width: 800,
     height: 600,
+    minWidth: 800,
+    minHeight: 600,
+    title: "Costume Management System",
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false

@@ -1,12 +1,32 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <title>Costume Management System</title>
+    <meta charset="UTF-8">
     <script>
         console.log(__dirname);
         console.log(process.env);
     </script>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <p>Test!</p>
+    <div class="sidebar">
+        <div class="sidebar-item" data-page="dashboard.html">Dashboard</div>
+        <div class="sidebar-item" data-page="costumes.html">Costumes</div>
+        <div class="sidebar-item" data-page="clients.html">Clients</div>
+        <div class="sidebar-item" data-page="settings.html">Settings</div>
+        <div class="sidebar-item" data-page="payments.html">Payments</div>
+    </div>
+
+
+    <div class="content">
+        <div class="content-header">
+            <h1></h1>
+        </div>
+        <div class="content-container">
+
+        </div>
+    </div>
 </body>
+<script src="backend.js"></script>
 </html>

@@ -1,0 +1,23 @@
+{
+  "name": "costume-management-system",
+  "version": "1.0.0",
+  "description": "Desktop Application for managing costumes for rent or for sale.",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pr0cht/costume-management-system.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/pr0cht/costume-management-system/issues"
+  },
+  "homepage": "https://github.com/pr0cht/costume-management-system#readme",
+  "devDependencies": {
+    "electron": "^37.2.0"
+  }
+}

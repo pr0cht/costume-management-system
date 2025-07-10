@@ -1,0 +1,11 @@
+@font-face {
+  font-family: 'Work Sans';
+  src: url('./assets/font/worksans-variablefont_wght-webfont.woff2') format('woff2'),
+       url('./assets/font/worksans-variablefont_wght-webfont.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+}
+
+body {
+  font-family: 'Work Sans', sans-serif;
+}

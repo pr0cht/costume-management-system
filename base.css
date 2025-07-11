@@ -1,12 +1,18 @@
 body {
     min-width: 20vh;
 
+    width: 100%;
+    height: 100%;
     margin: 0;
     padding: 0;
+
+    text-shadow: #000000 0px 0px 1px;
+    user-select: none;
 }
 
 h1 {
     margin: 0;
+    font-weight: 700;
 }
 
 .main {
@@ -24,18 +30,22 @@ h1 {
     width: 150px;
     height: 100%;
     background-color: #E64848;
+    filter: drop-shadow(0 0 5px rgb(0, 0, 0));
 }
 
 .logo {
-    margin-bottom: 15px;
+    margin: 15px;
     width: 75%;
     align-self: center;
     justify-self: center;
 
-    filter: drop-shadow(0 0 15px rgb(255, 255, 255));
+    filter: drop-shadow(0 0 10px rgb(255, 255, 255));
 }
 
 .sidebar-item {
+    display: flex;
+    flex-direction: row;
+
     font-weight: 750;
     padding: 15px;
 
@@ -50,8 +60,16 @@ h1 {
 }
 
 .sidebar-item:hover {
-    background-color: #D63636;
+    background-color: #b92828;
     transition: background-color 0.3s ease;
+    text-shadow: #ffffff 0px 0px 2px;
+}
+
+.sidebar-item img {
+    width: 20px;
+    height: 20px;
+    margin-right: 10px;
+    filter: invert(100);
 }
 
 .content-header{
@@ -64,4 +82,23 @@ h1 {
     height: 100%;
     margin: 0;
     padding: 0;
+}
+
+.content {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+/* pages */
+
+.page {
+    padding: 25px;
+}
+
+/* classes */
+
+.selectable {
+    user-select: text;
 }

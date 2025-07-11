@@ -1,0 +1,27 @@
+.dashboard {
+    display: flex;
+    flex-direction: column;
+    margin: 25px 25px 25px 0px;
+    padding: 25px;
+    
+    background-color: #fffef2;
+    border: 1px solid #1d1c1c;
+    border-radius: 25px;
+}
+
+.dashboard-overview {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+}
+
+.overview-item p {
+    margin: 10px;
+    text-align: center;
+}
+
+.overview-number {
+    font-size: 24px;
+    font-weight: bold;
+    justify-self: center;
+}

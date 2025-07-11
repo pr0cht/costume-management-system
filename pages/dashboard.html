@@ -1,1 +1,76 @@
-<h1>Dashboard</h1>
+<html>
+<body>
+    <div id="dashboard" class="page">
+        <h1>Dashboard</h1>
+        <div class="dashboard">
+            <div class="dashboard-overview">
+
+                <div class="overview-item overview-total">
+                    <p class="overview-number" id="total-costumes">0</p>
+                    <p>Total Costumes</p>
+                </div>
+                <div class="overview-item overview-rented">
+                    <p class="overview-number" id="costumes-rented">0</p>
+                    <p>Costumes Rented</p>
+                </div>
+                <div class="overview-item overview-revenue">
+                    <p class="overview-number" id="total-revenue">₱0.00</p>
+                    <p>Total Revenue this month</p>
+                </div>
+            </div>
+            <div class="dashboard-tables">
+                <div class="recent-costumes">
+                    <h2>Recently Rented Costumes</h2>
+                    <table id="recent-rented-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Category</th>
+                                <th>Status</th>
+                                <th>Rented By</th>
+                                <th>Rented On</th>
+                                <th>Due Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Recent costumes will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+                <div class="recent-clients">
+                    <h2>Recent Clients</h2>
+                    <table id="recent-clients-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Phone</th>
+                                <th>Service</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Recent clients will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+                <div class="made-to-order">
+                    <h2>Made-to-Order Costumes</h2>
+                    <table id="made-to-order-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Category</th>
+                                <th>Status</th>
+                                <th>Client</th>
+                                <th>Order Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Made-to-order costumes will be populated here -->
+                        </tbody>
+                    </table>
+            </div>
+        </div>        
+    </div>
+</body>
+</html>

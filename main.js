@@ -13,12 +13,12 @@ app.whenReady().then(() => {
     }
   });
 
-  mainWindow.loadFile('index.html');
+  mainWindow.loadFile('frontend/dist/index.html');
 
   mainWindow.on('closed', () => {
     app.quit();
   });
-    const tray = new Tray('assets/tray_icon.jpg');
+    const tray = new Tray('frontend/dist/assets/tray_icon.jpg');
     const contextMenu = require('electron').Menu.buildFromTemplate([
     {
         label: 'Show App',

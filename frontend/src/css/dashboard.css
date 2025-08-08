@@ -1,0 +1,57 @@
+.dashboard {
+    display: flex;
+    flex-direction: column;
+    margin: 25px 25px 25px 0px;
+    padding: 25px;
+    
+    background-color: #e9e8dc;
+    border: 1px solid #ddd;
+    border-radius: 25px;
+}
+
+.dashboard-overview {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+}
+
+.overview-item {
+    border: 1px solid #ddd;
+    border-radius: 25px;
+    padding: 20px;
+    margin-bottom: 10px;
+}
+
+.overview-item, .table {
+    background-color: rgb(248, 255, 240);
+}
+
+.overview-item p {
+    margin: 10px;
+    text-align: center;
+}
+
+.overview-number {
+    font-size: 24px;
+    font-weight: bold;
+    justify-self: center;
+}
+
+.dashboard h2 {
+    font-size: 1.1rem;
+}
+
+.dashboard th {
+    font-size: 0.8rem;
+    padding: 10px;
+    margin: 0;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+.table {
+    margin: 5px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 15px;
+}

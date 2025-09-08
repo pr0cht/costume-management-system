@@ -198,7 +198,6 @@ function App() {
         <img className="logo" src="assets/dcs_logo.png" alt="Davao Cosplay Shop" />
         <div className="sidebar-item" data-page="dashboard.html" onClick={() => setPage('dashboard')}>
           <img src="assets/dashboard.png" alt="Dashboard" />
-          Dashboard
         </div>
         <div className="sidebar-item" data-page="costumes.html" onClick={() => setPage('costumes')}>
           <img src="assets/costumes.png" alt="Costumes" />

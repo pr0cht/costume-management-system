@@ -1,4 +1,6 @@
 
 <!-- For testing: -->
 
-npx electron .
+npx electron . (root)
+
+npm run build (frontend)

@@ -51,11 +51,13 @@ const doughnutOptions = {
 
 const dashboard = (
   <div className="page dashboard">
-    <h1>Dashboard</h1>
     <div className="dashboard-cards">
       <div className="dashboard-card">
         <h2>Total Costumes</h2>
         <p>155</p>
+        <h1>Currently Rented</h1>
+        <p>10</p>
+        
       </div>
       <div className="dashboard-card">
         <h2>Available</h2>
@@ -186,8 +188,10 @@ function Clients() {
   );
 }
 
-var payments = <h1>Payments</h1>;
-var settings = <h1>Settings</h1>;
+var payments = <h1>Payments</h1>; // Placeholder for Payments page
+var settings = <h1>Settings</h1>; // Placeholder for Settings page
+
+// Main App Component -----------------------------------------------------------------------------------
 
 function App() {
   const [page, setPage] = React.useState('dashboard');
@@ -196,26 +200,27 @@ function App() {
     <div className="main">
       <div className="sidebar">
         <img className="logo" src="assets/dcs_logo.png" alt="Davao Cosplay Shop" />
-        <div className="sidebar-item" data-page="dashboard.html" onClick={() => setPage('dashboard')}>
+        <div className={`sidebar-item${page === 'dashboard' ? ' active' : ''}`} onClick={() => setPage('dashboard')} >
           <img src="assets/dashboard.png" alt="Dashboard" />
+          Dashboard
         </div>
-        <div className="sidebar-item" data-page="costumes.html" onClick={() => setPage('costumes')}>
+        <div className={`sidebar-item${page === 'costumes' ? ' active' : ''}`} onClick={() => setPage('costumes')}>
           <img src="assets/costumes.png" alt="Costumes" />
           Costumes
         </div>
-        <div className="sidebar-item" data-page="events.html" onClick={() => setPage('events')}>
+        <div className={`sidebar-item${page === 'events' ? ' active' : ''}`} onClick={() => setPage('events')}>
           <img src="assets/event.png" alt="Events" />
           Events
         </div>
-        <div className="sidebar-item" data-page="clients.html" onClick={() => setPage('clients')}>
+        <div className={`sidebar-item${page === 'clients' ? ' active' : ''}`} data-page="clients.html" onClick={() => setPage('clients')}>
           <img src="assets/client.png" alt="Clients" />
           Clients
         </div>
-        <div className="sidebar-item" data-page="payments.html">
+        <div className={`sidebar-item${page === 'payments' ? ' active' : ''}`} data-page="clients.html" onClick={() => setPage('payments')}>
           <img src="assets/payments.png" alt="Payments" />
           Payments
         </div>
-        <div className="sidebar-item" data-page="settings.html">
+        <div className={`sidebar-item${page === 'settings' ? ' active' : ''}`} data-page="clients.html" onClick={() => setPage('settings')}>
           <img src="assets/setting.png" alt="Settings" />
           Settings
         </div>
@@ -233,5 +238,7 @@ function App() {
     </div>
   );
 }
+
+
 
 export default App;

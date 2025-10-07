@@ -1,4 +1,4 @@
-const { app, BrowserWindow, Tray } = require('electron');
+const { app, BrowserWindow, Tray, Menu } = require('electron');
 
 app.whenReady().then(() => {
   const mainWindow = new BrowserWindow({
@@ -12,6 +12,8 @@ app.whenReady().then(() => {
       contextIsolation: false
     }
   });
+
+  Menu.setApplicationMenu(null);
 
   mainWindow.loadFile('frontend/dist/index.html');
 

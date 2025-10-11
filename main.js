@@ -7,19 +7,25 @@ const db = new Database(dbPath);
 
 app.whenReady().then(() => {
   const mainWindow = new BrowserWindow({
-    width: 800,
-    height: 600,
+    width: 1080,
+    height: 720,
     minWidth: 800,
     minHeight: 600,
     title: "Costume Management System",
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
-      nodeIntegration: true,
-      contextIsolation: false
+      nodeIntegration: false,
+      contextIsolation: true
     }
   });
 
-  Menu.setApplicationMenu(null);
+  const isDev = process.env.NODE_ENV !== 'production';
+  if (!isDev) {
+    Menu.setApplicationMenu(null);
+  }
+  if (isDev) {
+    mainWindow.webContents.openDevTools();
+  }
 
   mainWindow.loadFile('frontend/dist/index.html');
 
@@ -46,6 +52,9 @@ app.whenReady().then(() => {
     tray.setContextMenu(contextMenu);
 });
 
+app.on('will-quit', () => {
+  db.close();
+});
 
 // Database handlers
 const { ipcMain } = require('electron');
@@ -53,13 +62,32 @@ const { ipcMain } = require('electron');
 ipcMain.handle('add-costume', async (event, costumeData) => {
   const { name, origin, type, gender, size, price, inclusions, available, img } = costumeData;
 
-  const statement = db.prepare(`
-    INSERT INTO Costumes (costume_Name, costume_Origin, costume_Type, 
-    costume_Size, costume_Gender, costume_Price, costume_Inclusion, 
-    costume_Available, costume_Image)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `);
+  try {
+    const imageBuffer = img ? Buffer.from(img) : null;
 
-  const result = statement.run(name, origin, type, size, gender, price, inclusions, available, img);
-  return { success: true, lastID: result.lastInsertRowid };
+    const sql = `
+      INSERT INTO Costume (costume_Name, costume_Origin, costume_Type, 
+      costume_Size, costume_Gender, costume_Price, costume_Inclusion, 
+      costume_Available, costume_Image)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `;
+    
+    const stmt = db.prepare(sql);
+
+    const result = stmt.run(
+      name,
+      origin,
+      type,
+      size,
+      gender,
+      price,
+      inclusions,
+      available ? 1 : 0,
+      imageBuffer
+    );
+    return { success: true, lastID: result.lastInsertRowid };
+  } catch (err) {
+    console.error("Dtabase Error in main.js:", err.message);
+    return { success: false, error: err.message };
+  }
 });

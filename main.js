@@ -91,3 +91,23 @@ ipcMain.handle('add-costume', async (event, costumeData) => {
     return { success: false, error: err.message };
   }
 });
+
+ipcMain.handle('get-costumes', (event) => {
+  try {
+    const stmt = db.prepare('SELECT * FROM Costume');
+    const costumes = stmt.all();
+    const costumeWithImages = costumes.map(costume => {
+      if (costume.costume_Image) {
+        return{
+          ...costume,
+          costume_Image: costume.costume_Image.toString('base64')
+        };
+      }
+      return costume;
+  })
+    return { success: true, data: costumeWithImages };
+  } catch (err) {
+    console.error("Database Error in main.js:", err.message);
+    return { success: false, error: err.message };
+  }
+});

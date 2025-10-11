@@ -1,8 +1,31 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import AddCostumePopup from './popups/addCostumePopup';
 
+const bufferToURL = (base64String) => {
+  if (!base64String) {
+    return null;
+  }
+  return `data:image/png;base64,${base64String}`;
+}
+
 function Costumes() {
-  const [filterOpen, setFilterOpen] = React.useState(false);
+  const [filterOpen, setFilterOpen] = useState(false);
+  const [costumes, setCostumes] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchCostumes = async () => {
+      setIsLoading(true);
+      const result = await window.electronAPI.getCostumes();
+      if (result.success) {
+        setCostumes(result.data);
+      } else {
+        alert(`Failed to fetch costumes: ${result.error}`);
+      }
+      setIsLoading(false);
+    };
+    fetchCostumes();
+  }, []);
 
   return (
     <div className="page costumes">
@@ -13,7 +36,7 @@ function Costumes() {
           className="costumes-search"
           placeholder="Search costumes..."
         />
-        <button 
+        <button
           className="costumes-filter-btn"
           onClick={() => setFilterOpen((open) => !open)}
         >
@@ -42,40 +65,28 @@ function Costumes() {
         </div>
       )}
       <div className="costumes-grid">
-        <div className="costume-item"> {/* Example costume item */}
-          <div className="costume-thumbnail">
-            <img src="assets/costumes/tanjiro.jpg" alt="Kamado Tanjiro" />
-          </div>
-          <p><span className="costume-name">Kamado Tanjiro</span></p>
-          <p>Origin: <span className="costume-origin">Demon Slayer</span></p>
-          <p>Type: <span className="costume-type">Cloth</span></p>
-          <p>Size: <span className="costume-size">Size</span></p>
-          <p>Gender: <span className="costume-gender">Male</span></p>
-          <p>Price: <span className="costume-price">2000</span></p>
-          <p>Status: <span className="costume-status">Available</span></p>
-          <div className='costume-actions'>
-            <button className="view-btn costume-btn">Edit</button>
-            <button className="rent-btn costume-btn">Rent</button>  
-          </div>
-          
-        </div>
-        <div className="costume-item"> {/* Example costume item */}
-          <div className="costume-thumbnail">
-            <img src="assets/costumes/nezuko.jpg" alt="Kamado Nezuko" />
-          </div>
-          <p><span className="costume-name">Kamado Nezuko</span></p>
-          <p>Origin: <span className="costume-origin">Demon Slayer</span></p>
-          <p>Type: <span className="costume-type">Cloth</span></p>
-          <p>Size: <span className="costume-size">Small</span></p>
-          <p>Gender: <span className="costume-gender">Female</span></p>
-          <p>Price: <span className="costume-price">2000</span></p>
-          <p>Status: <span className="costume-status">Rented</span></p>
-          <div className='costume-actions'>
-            <button className="view-btn costume-btn">Edit</button>
-            <button className="rent-btn costume-btn">Rent</button>  
-          </div>
-        </div>
-        {/* Add */}
+        {isLoading ? (
+          <p>Loading costumes...</p>
+        ) : (
+          costumes.map((costume) => (
+            <div className="costume-item" key={costume.costume_ID}>
+              <div className="costume-thumbnail">
+                <img src={bufferToURL(costume.costume_Image)} alt={costume.costume_Name} />
+              </div>
+              <p><span className="costume-name">{costume.costume_Name}</span></p>
+              <p>Origin: <span className="costume-origin">{costume.costume_Origin}</span></p>
+              <p>Type: <span className="costume-type">{costume.costume_Type}</span></p>
+              <p>Size: <span className="costume-size">{costume.costume_Size}</span></p>
+              <p>Gender: <span className="costume-gender">{costume.costume_Gender}</span></p>
+              <p>Price: <span className="costume-price">{costume.costume_Price.toFixed(2)}</span></p>
+              <p>Status: <span className="costume-status">{costume.costume_Available ? 'Available' : 'Rented'}</span></p>
+              <div className='costume-actions'>
+                <button className="view-btn costume-btn">Edit</button>
+                <button className="rent-btn costume-btn">Rent</button>
+              </div>
+            </div>
+          ))
+        )}
       </div>
     </div>
   );

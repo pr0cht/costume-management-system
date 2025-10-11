@@ -4,3 +4,5 @@
 npx electron . (root)
 
 npm run build (frontend)
+
+npm run rebuild (root)

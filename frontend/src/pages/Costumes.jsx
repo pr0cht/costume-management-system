@@ -1,9 +1,18 @@
+// import Database from 'better-sqlite3';
+// const Database = require('better-sqlite3');
+// const db = new Database('../db/csm.db', { verbose: console.log });
+// const stmt = db.prepare('SELECT * FROM Costumes');
+
+import React, { useState } from 'react';
+import AddCostumePopup from './popups/addCostumePopup';
+
 function Costumes() {
   const [filterOpen, setFilterOpen] = React.useState(false);
 
   return (
     <div className="page costumes">
       <div className="costumes-topbar">
+        <AddCostumePopup />
         <input
           type="text"
           className="costumes-search"
@@ -77,5 +86,4 @@ function Costumes() {
   );
 };
 
-import React from 'react';
 export default Costumes;

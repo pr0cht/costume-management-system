@@ -88,7 +88,7 @@ function AddCostumePopup() {
         <div className="popup-overlay">
           <div className="popup-content">
             <h2>Add New Costume</h2>
-            <form className="add-costume-form" onSubmit={handleAddCostume}>
+            <form className="add-costume-form form" onSubmit={handleAddCostume}>
               <div className="row spacebetween">
                 {/* costume name */}
                 <label>Costume Name:</label>

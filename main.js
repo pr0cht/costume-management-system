@@ -111,3 +111,36 @@ ipcMain.handle('get-costumes', (event) => {
     return { success: false, error: err.message };
   }
 });
+
+ipcMain.handle('edit-costume', async (event, costumeData) => {
+  const { id, name, origin, type, gender, size, price, inclusions, available, img } = costumeData;
+
+  try {
+    const imageBuffer = img ? Buffer.from(img) : null; 
+    const sql = `
+      UPDATE Costume
+      SET costume_Name = ?, costume_Origin = ?, costume_Type = ?, 
+          costume_Size = ?, costume_Gender = ?, costume_Price = ?, 
+          costume_Inclusion = ?, costume_Available = ?, costume_Image = ?
+      WHERE costume_ID = ?
+    `;
+    const stmt = db.prepare(sql);
+
+    const result = stmt.run(
+      name,
+      origin,
+      type,
+      size,
+      gender,
+      price,
+      inclusions,
+      available ? 1 : 0,
+      imageBuffer,
+      id
+    );
+    return { success: true, changes: result.changes };
+  } catch (err) {
+    console.error("Database Error in main.js:", err.message);
+    return { success: false, error: err.message };
+  }
+});

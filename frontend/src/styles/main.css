@@ -759,21 +759,6 @@ button:focus-visible, .button:focus,
   margin-top: 10px;
 }
 
-.costume-btn {
-  margin: 5px;
-  padding: 8px 12px;
-  border: none;
-  border-radius: 4px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.2s;
-  font-size: 0.9em;
-}
-
-.costume-btn:hover {
-  opacity: 0.8;
-}
-
 /* Events Sections */
 .events-section {
   margin: 10px 0;
@@ -1053,6 +1038,20 @@ button:focus-visible, .button:focus,
   .settings-actions button {
     width: 100%;
   }
+}
+
+.button {
+  padding: 8px 16px;
+  background: #E64848;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.button:hover {
+  background: #b92828;
 }
 
 .row {

@@ -351,21 +351,6 @@ button:focus-visible, .button:focus,
   font-size: 1em;
 }
 
-.costumes-filter-btn {
-  padding: 8px 16px;
-  background: #E64848;
-  color: #fff;
-  border: none;
-  border-radius: 4px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.costumes-filter-btn:hover {
-  background: #b92828;
-}
-
 .costumes-filter-popup {
   position: relative;
   background: #fff;
@@ -401,21 +386,6 @@ button:focus-visible, .button:focus,
   border-radius: 4px;
   border: 1px solid #ccc;
   font-size: 1em;
-}
-
-.events-filter-btn {
-  padding: 8px 16px;
-  background: #E64848;
-  color: #fff;
-  border: none;
-  border-radius: 4px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.events-filter-btn:hover {
-  background: #b92828;
 }
 
 .events-filter-popup {
@@ -458,21 +428,6 @@ button:focus-visible, .button:focus,
   font-size: 0.9em;
 }
 
-.edit-btn {
-  width: 100%;
-  padding: 8px;
-  background: #E64848;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.edit-btn:hover {
-  background: #b92828;
-}
-
 /* Clients Page */
 .clients-topbar {
   display: flex;
@@ -493,20 +448,6 @@ button:focus-visible, .button:focus,
   font-size: 1em;
 }
 
-.clients-filter-btn {
-  padding: 8px 16px;
-  background: #E64848;
-  color: #fff;
-  border: none;
-  border-radius: 4px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.clients-filter-btn:hover {
-  background: #b92828;
-}
 
 .clients-filter-popup {
   background: #fff;
@@ -572,45 +513,12 @@ button:focus-visible, .button:focus,
   font-weight: 600;
 }
 
-.edit-btn {
-  background: #E64848;
-  color: white;
-}
-
-.edit-btn:hover {
-  background: #b92828;
-}
-
-.payments-btn {
-  background: #7E001B;
-  color: white;
-}
-
-.payments-btn:hover {
-  background: #5a0013;
-}
-
 /* Quick Actions */
 .dashboard-quick-actions {
     display: flex;
     flex-wrap: wrap;
     gap: 15px;
     margin: 30px 0;
-}
-
-.action-btn {
-    background: #E64848;
-    color: white;
-    border: none;
-    padding: 12px 20px;
-    border-radius: 6px;
-    font-weight: 600;
-    transition: all 0.2s ease;
-}
-
-.action-btn:hover {
-    background: #b92828;
-    transform: translateY(-2px);
 }
 
 /* Trends and Stats */
@@ -788,14 +696,6 @@ button:focus-visible, .button:focus,
   color: #888;
 }
 
-.past-events .edit-btn {
-  background: #888;
-}
-
-.past-events .edit-btn:hover {
-  background: #666;
-}
-
 /* Payments Page Styles */
 .payments-topbar {
   display: flex;
@@ -869,22 +769,6 @@ button:focus-visible, .button:focus,
 
 .payments-table tr:hover {
   background: #fff5f5;
-}
-
-.edit-payment-btn {
-  padding: 6px 12px;
-  background: #E64848;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background 0.2s;
-  font-size: 0.9em;
-  font-weight: 600;
-}
-
-.edit-payment-btn:hover {
-  background: #b92828;
 }
 
 /* Settings Page Styles */

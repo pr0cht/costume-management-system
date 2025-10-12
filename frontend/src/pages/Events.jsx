@@ -10,7 +10,7 @@ function Events() {
           placeholder="Search events..."
         />
         <button
-          className="events-filter-btn"
+          className="events-filter-btn button"
           onClick={() => setFilterOpen((open) => !open)}
         >
           Filter
@@ -38,12 +38,12 @@ function Events() {
           <div className="event-item">
             <h3 className="event-name">Anime Convention 2025</h3>
             <p className="event-datetime">August 15, 2025 - 9:00 AM</p>
-            <button className="edit-btn">Edit Event Details</button>
+            <button className="edit-btn button">Edit Event Details</button>
           </div>
           <div className="event-item">
             <h3 className="event-name">Cosplay Competition</h3>
             <p className="event-datetime">August 20, 2025 - 2:00 PM</p>
-            <button className="edit-btn">Edit Event Details</button>
+            <button className="edit-btn button">Edit Event Details</button>
           </div>
         </div>
       </div>
@@ -54,12 +54,12 @@ function Events() {
           <div className="event-item">
             <h3 className="event-name">Summer Anime Fest</h3>
             <p className="event-datetime">July 15, 2025 - 10:00 AM</p>
-            <button className="edit-btn">View Details</button>
+            <button className="edit-btn button">View Details</button>
           </div>
           <div className="event-item">
             <h3 className="event-name">Comic Convention</h3>
             <p className="event-datetime">July 1, 2025 - 1:00 PM</p>
-            <button className="edit-btn">View Details</button>
+            <button className="edit-btn button">View Details</button>
           </div>
         </div>
       </div>

@@ -57,6 +57,9 @@ app.on('will-quit', () => {
 });
 
 // Database handlers
+
+// costume functions
+
 const { ipcMain } = require('electron');
 
 ipcMain.handle('add-costume', async (event, costumeData) => {
@@ -141,6 +144,35 @@ ipcMain.handle('edit-costume', async (event, costumeData) => {
     return { success: true, changes: result.changes };
   } catch (err) {
     console.error("Database Error in main.js:", err.message);
+    return { success: false, error: err.message };
+  }
+});
+
+// client functions
+
+ipcMain.handle('add-client', async (event, clientData) => {
+  const { name, address, age, cellphone, socials, occupation } = clientData;
+
+  try {
+    const sql = `
+      INSERT INTO Client (client_Name, client_Address, client_Age, client_Cellphone,
+      client_Socials, client_Occupation)
+      VALUES (?, ?, ?, ?, ?, ?)
+    `;
+    
+    const stmt = db.prepare(sql);
+
+    const result = stmt.run(
+      name,
+      address,
+      age,
+      cellphone,
+      socials,
+      occupation
+    );
+    return { success: true, lastID: result.lastInsertRowid };
+  } catch (err) {
+    console.error("Dtabase Error in main.js:", err.message);
     return { success: false, error: err.message };
   }
 });

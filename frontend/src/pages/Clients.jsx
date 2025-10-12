@@ -4,13 +4,14 @@ function Clients() {
   return (
     <div className="page clients">
       <div className="clients-topbar">
+        <AddClientPopup />
         <input
           type="text"
           className="clients-search"
           placeholder="Search clients..."
         />
         <button
-          className="clients-filter-btn"
+          className="clients-filter-btn button"
           onClick={() => setFilterOpen((open) => !open)}
         >
           Filter
@@ -43,8 +44,8 @@ function Clients() {
             <p><strong>Occupation:</strong> Student</p>
           </div>
           <div className="client-actions">
-            <button className="edit-btn">Edit Details</button>
-            <button className="payments-btn">Payments</button>
+            <button className="edit-btn button">Edit Details</button>
+            <button className="payments-btn button">Payments</button>
           </div>
         </div>
 
@@ -58,8 +59,8 @@ function Clients() {
             <p><strong>Occupation:</strong> Professional</p>
           </div>
           <div className="client-actions">
-            <button className="edit-btn">Edit Details</button>
-            <button className="payments-btn">Payments</button>
+            <button className="edit-btn button">Edit Details</button>
+            <button className="payments-btn button">Payments</button>
           </div>
         </div>
       </div>
@@ -68,4 +69,5 @@ function Clients() {
 }
 
 import React from 'react';
+import AddClientPopup from './popups/addClientPopup';
 export default Clients;

@@ -130,12 +130,12 @@ function Settings() {
               </select>
             </div>
             <div className="setting-item">
-              <button className="backup-btn">Backup Now</button>
-              <button className="restore-btn">Restore Data</button>
+              <button className="backup-btn button">Backup Now</button>
+              <button className="restore-btn button">Restore Data</button>
             </div>
             <div className="setting-item">
               <label>Change Password</label>
-              <button className="password-btn">Update Password</button>
+              <button className="password-btn button">Update Password</button>
             </div>
           </div>
         </div>
@@ -145,10 +145,10 @@ function Settings() {
           <h2>User Management</h2>
           <div className="settings-content">
             <div className="setting-item">
-              <button className="users-btn">Manage Users</button>
+              <button className="users-btn button">Manage Users</button>
             </div>
             <div className="setting-item">
-              <button className="roles-btn">Manage Roles</button>
+              <button className="roles-btn button">Manage Roles</button>
             </div>
           </div>
         </div>

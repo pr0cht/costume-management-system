@@ -10,7 +10,7 @@ function Payments() {
           placeholder="Search payments..."
         />
         <button
-          className="payments-filter-btn"
+          className="payments-filter-btn button"
           onClick={() => setFilterOpen((open) => !open)}
         >
           Filter
@@ -48,7 +48,7 @@ function Payments() {
               <td>2025-08-09</td>
               <td>₱500</td>
               <td>
-                <button className="edit-payment-btn">Edit Details</button>
+                <button className="edit-payment-btn button">Edit Details</button>
               </td>
             </tr>
             <tr>
@@ -58,7 +58,7 @@ function Payments() {
               <td>2025-08-08</td>
               <td>₱0</td>
               <td>
-                <button className="edit-payment-btn">Edit Details</button>
+                <button className="edit-payment-btn button">Edit Details</button>
               </td>
             </tr>
           </tbody>

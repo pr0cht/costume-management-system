@@ -161,7 +161,7 @@ function AddCostumePopup() {
               <div className="row spacebetween">
                 {/* costume availability */}
                 <label>Available:</label>
-                <input type="checkbox" name="available"
+                <input className="checkbox" type="checkbox" name="available"
                   checked={available}
                   onChange={(e) => setAvailable(e.target.checked)} />
               </div>

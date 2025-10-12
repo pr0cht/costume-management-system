@@ -1,5 +1,27 @@
+import React, { useEffect, useState } from 'react';
+import AddClientPopup from './popups/addClientPopup';
+
 function Clients() {
-  const [filterOpen, setFilterOpen] = React.useState(false);
+  const [filterOpen, setFilterOpen] = useState(false);
+  const [clients, setClients] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [editingClient, setEditingClient] = useState(null);
+
+
+  const fetchClients = async () => {
+    setIsLoading(true);
+    const result = await window.electronAPI.getClients();
+    if (result.success) {
+      setClients(result.data);
+    } else {
+      alert(`Failed to fetch clients data: ${result.error}`)
+    }
+    setIsLoading(false);
+  }
+
+  useEffect(() => {
+    fetchClients();
+  }, []);
 
   return (
     <div className="page clients">
@@ -32,42 +54,31 @@ function Clients() {
           </div>
         </div>
       )}
-      
-      <div className="clients-grid">
-        <div className="client-item">
-          <h3 className="client-name">Jane Doe</h3>
-          <div className="client-details">
-            <p><strong>Address:</strong> 123 Sample Street, Davao City</p>
-            <p><strong>Age:</strong> 25</p>
-            <p><strong>Cellphone:</strong> +63 912 345 6789</p>
-            <p><strong>Social Media:</strong> facebook.com/janedoe</p>
-            <p><strong>Occupation:</strong> Student</p>
-          </div>
-          <div className="client-actions">
-            <button className="edit-btn button">Edit Details</button>
-            <button className="payments-btn button">Payments</button>
-          </div>
-        </div>
 
-        <div className="client-item">
-          <h3 className="client-name">John Smith</h3>
-          <div className="client-details">
-            <p><strong>Address:</strong> 456 Example Ave, Davao City</p>
-            <p><strong>Age:</strong> 30</p>
-            <p><strong>Cellphone:</strong> +63 923 456 7890</p>
-            <p><strong>Social Media:</strong> facebook.com/johnsmith</p>
-            <p><strong>Occupation:</strong> Professional</p>
-          </div>
-          <div className="client-actions">
-            <button className="edit-btn button">Edit Details</button>
-            <button className="payments-btn button">Payments</button>
-          </div>
-        </div>
+      <div className="clients-grid">
+        {isLoading ? (
+          <p>Loading clients...</p>
+        ) : (
+          clients.map((client) => (
+            <div className="client-item" key={client.client_ID}>
+              <h3 className="client-name">{client.client_Name}</h3>
+              <div className="client-details">
+                <p><strong>Address:</strong> <span className="client-name">{client.client_Address}</span></p>
+                <p><strong>Age:</strong> <span className="client-age">{client.client_Age}</span></p>
+                <p><strong>Cellphone:</strong> <span className="client-cellphone">{client.client_Cellphone}</span></p>
+                <p><strong>Social Media:</strong> <span className="client-socials">{client.client_Socials}</span></p>
+                <p><strong>Occupation:</strong> <span className="client-occupation">{client.client_Occupation}</span></p>
+              </div>
+              <div className="client-actions">
+                <button className="edit-btn button" onClick={() => setEditingClient(client)}>Edit Client Details</button>
+                <button className="payments-btn button">Payments</button>
+              </div>
+            </div>
+          ))
+        )}
       </div>
     </div>
   );
 }
 
-import React from 'react';
-import AddClientPopup from './popups/addClientPopup';
 export default Clients;

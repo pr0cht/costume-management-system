@@ -176,3 +176,15 @@ ipcMain.handle('add-client', async (event, clientData) => {
     return { success: false, error: err.message };
   }
 });
+
+ipcMain.handle('get-clients', (event) => {
+  try {
+    const stmt = db.prepare('SELECT * FROM Client');
+    const clients = stmt.all();
+
+    return { success: true, data: clients };
+  } catch (err) {
+    console.error("Database Error in main.js:", err.message);
+    return { success: false, error: err.message };
+  }
+});

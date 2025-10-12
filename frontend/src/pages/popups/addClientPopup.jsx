@@ -108,7 +108,6 @@ function AddClientPopup() {
       )}
     </div>
   )
-
 }
 
 export default AddClientPopup;

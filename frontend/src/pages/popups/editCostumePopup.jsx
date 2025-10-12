@@ -70,7 +70,7 @@ function EditCostumePopup({ costume, onClose, onCostumeUpdated }) {
 
             const result = await window.electronAPI.editCostume(updatedCostumeData);
             if (result.success) {
-                alert(`Costume updated successfully. ID: ${result.lastID}`);
+                alert(`Costume updated successfully. ID: ${result.id}`);
                 onCostumeUpdated();
                 onClose();
             } else {
@@ -183,9 +183,11 @@ function EditCostumePopup({ costume, onClose, onCostumeUpdated }) {
                             </figure>
                         </div>
                     )}
-                    <button type="submit">Save Changes</button>
+                    <div className="form-actions">
+                        <button type="submit">Save Changes</button>
+                        <button type="button" onClick={onClose}>Cancel</button>                        
+                    </div>
                 </form>
-                <button type="button" onClick={onClose}>Close</button>
             </div>
         </div>
     )

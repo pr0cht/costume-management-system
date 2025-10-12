@@ -89,7 +89,7 @@ function EditCostumePopup({ costume, onClose, onCostumeUpdated }) {
     return (
         <div className="popup-overlay">
             <div className="popup-content">
-                <h2>Edit "{costume.costume_Name}</h2>
+                <h2>Edit {costume.costume_Name}</h2>
                 <form className="edit-costume-form form" onSubmit={handleEditCostume}>
                     <div className="row spacebetween">
                         {/* costume name */}

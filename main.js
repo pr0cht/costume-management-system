@@ -188,3 +188,31 @@ ipcMain.handle('get-clients', (event) => {
     return { success: false, error: err.message };
   }
 });
+
+ipcMain.handle('edit-client', async (event, clientData) => {
+  const { id, name, address, age, cellphone, socials, occupation } = clientData;
+
+  try {
+    const sql = `
+      UPDATE Client
+      SET client_Name = ?, client_Address = ?, client_Age = ?, 
+          client_Cellphone = ?, client_Socials = ?, client_Occupation = ?
+      WHERE client_ID = ?
+    `;
+    const stmt = db.prepare(sql);
+
+    const result = stmt.run(
+      name,
+      address,
+      age,
+      cellphone,
+      socials,
+      occupation,
+      id
+    );
+    return { success: true, changes: result.changes };
+  } catch (err) {
+    console.error("Database Error in main.js:", err.message);
+    return { success: false, error: err.message };
+  }
+});

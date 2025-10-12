@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import AddClientPopup from './popups/addClientPopup';
+import EditClientPopup from './popups/editClientPopup';
 
 function Clients() {
   const [filterOpen, setFilterOpen] = useState(false);
   const [clients, setClients] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [editingClient, setEditingClient] = useState(null);
-
 
   const fetchClients = async () => {
     setIsLoading(true);
@@ -70,13 +70,19 @@ function Clients() {
                 <p><strong>Occupation:</strong> <span className="client-occupation">{client.client_Occupation}</span></p>
               </div>
               <div className="client-actions">
-                <button className="edit-btn button" onClick={() => setEditingClient(client)}>Edit Client Details</button>
+                <button className="edit-btn button" onClick={() => setEditingClient(client)}>Edit Details</button>
                 <button className="payments-btn button">Payments</button>
               </div>
             </div>
           ))
         )}
       </div>
+      <EditClientPopup
+        key={editingClient?.client_ID || 'new-client-editor'}
+        client={editingClient}
+        onClose={() => setEditingClient(null)}
+        onClientUpdated={fetchClients}
+      />
     </div>
   );
 }

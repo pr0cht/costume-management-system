@@ -11,6 +11,7 @@ app.whenReady().then(() => {
     height: 720,
     minWidth: 800,
     minHeight: 600,
+    icon: path.join(__dirname, 'cms_icon.ico'),
     title: "Costume Management System",
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
@@ -213,6 +214,31 @@ ipcMain.handle('edit-client', async (event, clientData) => {
     return { success: true, changes: result.changes };
   } catch (err) {
     console.error("Database Error in main.js:", err.message);
+    return { success: false, error: err.message };
+  }
+});
+
+// event functions
+
+ipcMain.handle('add-event', async (event, eventData) => {
+  const { name, date, location } = eventData;
+
+  try {
+    const sql = `
+      INSERT INTO Event (event_Name, event_Date, event_Location)
+      VALUES (?, ?, ?)
+    `;
+    
+    const stmt = db.prepare(sql);
+
+    const result = stmt.run(
+      name,
+      date,
+      location
+    );
+    return { success: true, lastID: result.lastInsertRowid };
+  } catch (err) {
+    console.error("Dtabase Error in main.js:", err.message);
     return { success: false, error: err.message };
   }
 });

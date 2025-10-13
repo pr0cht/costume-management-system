@@ -2,6 +2,7 @@ import { Bar, Doughnut } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, ArcElement, Title, Tooltip, Legend } from 'chart.js';
 import AddCostumePopup from './popups/addCostumePopup';
 import AddClientPopup from './popups/addClientPopup';
+import AddEventPopup from './popups/addEventPopup';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Title, Tooltip, Legend);
 
@@ -65,7 +66,7 @@ const Dashboard = (
       <AddCostumePopup />
       <button className="action-btn button">Create Rental</button>
       <AddClientPopup />
-      <button className="action-btn button">Add Event</button>
+      <AddEventPopup />
     </div>
     <div className="dashboard-cards">
       <div className="dashboard-card flex-row">

@@ -78,7 +78,6 @@ function Clients() {
         )}
       </div>
       <EditClientPopup
-        key={editingClient?.client_ID || 'new-client-editor'}
         client={editingClient}
         onClose={() => setEditingClient(null)}
         onClientUpdated={fetchClients}

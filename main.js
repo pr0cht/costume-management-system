@@ -4,6 +4,7 @@ const Database = require('better-sqlite3');
 
 const dbPath = path.join(__dirname, 'db', 'cms.db');
 const db = new Database(dbPath);
+db.pragma(`busy_timeout = 5000`)
 
 app.disableHardwareAcceleration();
 app.whenReady().then(() => {
@@ -97,22 +98,68 @@ ipcMain.handle('add-costume', async (event, costumeData) => {
   }
 });
 
-ipcMain.handle('get-costumes', (event) => {
+ipcMain.handle('get-costumes', (event, filters) => {
+  // ✅ Log what the backend receives. Check this in your TERMINAL.
+  console.log('Backend received filters:', filters);
+
   try {
-    const stmt = db.prepare('SELECT * FROM Costume');
-    const costumes = stmt.all();
-    const costumeWithImages = costumes.map(costume => {
+    let baseQuery = 'SELECT * FROM Costume';
+    const whereClauses = [];
+    const params = [];
+
+    // --- Build WHERE clauses safely ---
+    if (filters?.searchTerm) {
+      whereClauses.push('(costume_Name LIKE ? OR costume_Origin LIKE ?)');
+      params.push(`%${filters.searchTerm}%`, `%${filters.searchTerm}%`);
+    }
+    if (filters?.available) {
+      whereClauses.push('costume_Available = ?');
+      params.push(1);
+    }
+    if (filters?.size) {
+      whereClauses.push('costume_Size = ?');
+      params.push(filters.size);
+    }
+    if (filters?.gender) {
+      whereClauses.push('costume_Gender = ?');
+      params.push(filters.gender);
+    }
+    if (filters?.type) {
+      whereClauses.push('costume_Type = ?');
+      params.push(filters.type);
+    }
+
+    if (whereClauses.length > 0) {
+      baseQuery += ` WHERE ${whereClauses.join(' AND ')}`;
+    }
+
+    // --- Build ORDER BY clause safely ---
+    const sortableColumns = {
+      name: 'costume_Name',
+      price: 'costume_Price',
+      availability: 'costume_Available'
+    };
+    const sortColumn = sortableColumns[filters?.sort] || 'costume_Name';
+    const sortOrder = ['ASC', 'DESC'].includes(filters?.sortOrder?.toUpperCase()) ? filters.sortOrder.toUpperCase() : 'ASC';
+
+    baseQuery += ` ORDER BY ${sortColumn} ${sortOrder}`;
+    
+    console.log('Executing SQL:', baseQuery, params);
+
+    const stmt = db.prepare(baseQuery);
+    const costumes = stmt.all(...params);
+
+    const costumesWithImages = costumes.map(costume => {
       if (costume.costume_Image) {
-        return{
-          ...costume,
-          costume_Image: costume.costume_Image.toString('base64')
-        };
+        return { ...costume, costume_Image: costume.costume_Image.toString('base64') };
       }
       return costume;
-  })
-    return { success: true, data: costumeWithImages };
+    });
+    
+    return { success: true, data: costumesWithImages };
+
   } catch (err) {
-    console.error("Database Error in main.js:", err.message);
+    console.error("Database Error fetching costumes:", err.message);
     return { success: false, error: err.message };
   }
 });

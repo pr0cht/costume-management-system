@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 function AddCostumePopup() {
   const [name, setName] = useState("");
   const [origin, setOrigin] = useState("");
-  const [type, setType] = useState("cloth");
+  const [type, setType] = useState("Cloth");
   const [size, setSize] = useState("m");
   const [gender, setGender] = useState("unisex");
   const [price, setPrice] = useState("");
@@ -18,9 +18,9 @@ function AddCostumePopup() {
   const resetForm = () => {
     setName("");
     setOrigin("");
-    setType("cloth");
-    setSize("m");
-    setGender("unisex");
+    setType("Cloth");
+    setSize("MEDIUM");
+    setGender("Unisex");
     setPrice("");
     setInclusions("");
     setAvailable(true);
@@ -109,11 +109,11 @@ function AddCostumePopup() {
                 <select className="costume-select-input" name="costumeType" required
                   value={type}
                   onChange={(e) => setType(e.target.value)}>
-                  <option value="cloth">Cloth</option>
-                  <option value="armor">Armor</option>
-                  <option value="singleItem">Single Item</option>
-                  <option value="other">Other</option>
-                  <option value="none">Not Applicable</option>
+                  <option value="Cloth">Cloth</option>
+                  <option value="Armor">Armor</option>
+                  <option value="Single Item">Single Item</option>
+                  <option value="Other">Other</option>
+                  <option value="Not Applicable">Not Applicable</option>
                 </select>
               </div>
               <div className="row spacebetween">
@@ -122,14 +122,14 @@ function AddCostumePopup() {
                 <select className="costume-select-input" name="size" required
                   value={size}
                   onChange={(e) => setSize(e.target.value)}>
-                  <option value="xs">XS</option>
-                  <option value="s">S</option>
-                  <option value="m">M</option>
-                  <option value="l">L</option>
-                  <option value="xl">XL</option>
-                  <option value="xxl">XXL</option>
-                  <option value="oneSize">One Size Fits All</option>
-                  <option value="none">Not Applicable</option>
+                  <option value="XSMALL">XS</option>
+                  <option value="SMALL">S</option>
+                  <option value="MEDIUM">M</option>
+                  <option value="LARGE">L</option>
+                  <option value="XLARGE">XL</option>
+                  <option value="XXLARGE">XXL</option>
+                  <option value="One Size">One Size Fits All</option>
+                  <option value="Not Applicable">Not Applicable</option>
                 </select>
               </div>
               <div className="row spacebetween">
@@ -138,10 +138,10 @@ function AddCostumePopup() {
                 <select className="costume-select-input" name="gender" required
                   value={gender}
                   onChange={(e) => setGender(e.target.value)}>
-                  <option value="male">Male</option>
-                  <option value="female">Female</option>
-                  <option value="unisex">Unisex</option>
-                  <option value="none">Not Applicable</option>
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                  <option value="Unisex">Unisex</option>
+                  <option value="Not Applicable">Not Applicable</option>
                 </select>
               </div>
               <div className="row spacebetween">

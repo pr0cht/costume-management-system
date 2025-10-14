@@ -106,10 +106,13 @@ function Events() {
           )}
         </div>
         <EditEventPopup
-          key={editingEvent?.event_ID || 'new-event-editor'}
           event={editingEvent}
           onClose={() => setEditingEvent(null)}
-          onEventUpdated={fetchActiveEvents && fetchPastEvents}
+          onEventUpdated={() => {
+            fetchActiveEvents();
+            fetchPastEvents();
+          }
+          }
         />
       </div>
     </div>

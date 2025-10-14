@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { use, useEffect, useState } from 'react';
 import AddCostumePopup from './popups/addCostumePopup';
 import EditCostumePopup from './popups/editCostumePopup';
 
@@ -15,20 +15,50 @@ function Costumes() {
   const [isLoading, setIsLoading] = useState(true);
   const [editingCostume, setEditingCostume] = useState(null);
 
+  const [searchTerm, setSearchTerm] = useState('');
+  const [showAvailableOnly, setShowAvailableOnly] = useState(false);
+  const [filterSize, setFilterSize] = useState('');
+  const [filterGender, setFilterGender] = useState('');
+  const [filterType, setFilterType] = useState('');
+  const [sort, setSort] = useState('name');
+  const [sortOrder, setSortOrder] = useState('asc');
+
   const fetchCostumes = async () => {
     setIsLoading(true);
-    const result = await window.electronAPI.getCostumes();
-    if (result.success) {
-      setCostumes(result.data);
-    } else {
-      alert(`Failed to fetch costumes: ${result.error}`);
-    }
+      const filters = {
+        searchTerm,
+        available: showAvailableOnly,
+        size: filterSize,
+        gender: filterGender,
+        type: filterType,
+        sort,
+        sortOrder,
+      };
+
+      console.log("Sending filters to backend:", filters);
+
+      const result = await window.electronAPI.getCostumes(filters);
+      if (result.success) {
+        setCostumes(result.data);
+      } else {
+        alert(`Failed to fetch costumes: ${result.error}`);
+      }
     setIsLoading(false);
-  };
+  }
+
 
   useEffect(() => {
-    fetchCostumes();
-  }, []);
+    setIsLoading(true);
+
+    const handler = setTimeout(() => {
+      fetchCostumes();
+    }, 1000)
+
+    return () => {
+      clearTimeout(handler);
+    }
+  }, 
+  [searchTerm, showAvailableOnly, filterSize, filterGender, filterType, sort, sortOrder])
 
   return (
     <div className="page costumes">
@@ -37,7 +67,9 @@ function Costumes() {
         <input
           type="text"
           className="costumes-search"
+          value={searchTerm}
           placeholder="Search costumes..."
+          onChange={(e) => setSearchTerm(e.target.value)}
         />
         <button
           className="costumes-filter-btn button"
@@ -50,21 +82,66 @@ function Costumes() {
         <div className="costumes-filter-popup">
           <h4>Filter Options</h4>
           <div>
-            <label>
-              <input type="checkbox" /> Available
-            </label>
+            <label>Filter by Size: </label>
+            <select
+              value={filterSize}
+              onChange={(e) => setFilterSize(e.target.value)}
+            >
+              <option value="">All</option>
+              <option value="XSMALL">XS</option>
+              <option value="SMALL">S</option>
+              <option value="MEDIUM">M</option>
+              <option value="LARGE">L</option>
+              <option value="XLARGE">XL</option>
+              <option value="XXLARGE">XXL</option>
+              <option value="One Size">One Size Fits All</option>
+              <option value="Not Applicable">Not Applicable</option>
+            </select>
           </div>
           <div>
-            <label>
-              <input type="checkbox" /> Rented
-            </label>
+            <label>Filter by Gender: </label>
+            <select
+              value={filterGender}
+              onChange={(e) => setFilterGender(e.target.value)}
+            >
+              <option value="">All</option>
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+              <option value="Unisex">Unisex</option>
+            </select>
+            <div>
+              <label>Filter by Type: </label>
+              <select
+                value={filterType}
+                onChange={(e) => setFilterType(e.target.value)}
+              >
+                <option value="">All</option>
+                <option value="Cloth">Cloth</option>
+                <option value="Armor">Armor</option>
+                <option value="Single Item">Single Item</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+            <div>
+              <label>
+                <input type="checkbox"
+                  checked={showAvailableOnly}
+                  onChange={(e) => setShowAvailableOnly(e.target.checked)} /> Available
+              </label>
+            </div>
+            <div>
+              <label>Sort by: </label>
+              <select value={sort} onChange={(e) => setSort(e.target.value)}>
+                <option value="name">Name</option>
+                <option value="price">Price</option>
+                <option value="availability">Availability</option>
+              </select>
+              <select value={sortOrder} onChange={(e) => setSortOrder(e.target.value)}>
+                <option value="ASC">Ascending</option>
+                <option value="DESC">Descending</option>
+              </select>
+            </div>
           </div>
-          <div>
-            <label>
-              <input type="checkbox" /> By Category
-            </label>
-          </div>
-          {/* Add more filter options */}
         </div>
       )}
       <div className="costumes-grid">

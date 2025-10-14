@@ -87,7 +87,6 @@ function EditCostumePopup({ costume, onClose, onCostumeUpdated }) {
 
             const result = await window.electronAPI.editCostume(updatedCostumeData);
             if (result.success) {
-                alert(`Costume updated successfully. ID: ${result.id}`);
                 onCostumeUpdated();
                 onClose();
             } else {

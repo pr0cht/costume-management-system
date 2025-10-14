@@ -38,7 +38,6 @@ function EditEventPopup({ event, onClose, onEventUpdated }) {
 
       const result = await window.electronAPI.editEvent(updatedEventData);
       if (result.success) {
-        alert(`Event details updated successfully.`);
         onEventUpdated();
         onClose();
       } else {

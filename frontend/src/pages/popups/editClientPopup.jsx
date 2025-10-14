@@ -50,7 +50,6 @@ function EditClientPopup({ client, onClose, onClientUpdated }) {
 
       const result = await window.electronAPI.editClient(updatedClientData);
       if (result.success) {
-        alert(`Client details updated successfully.`);
         onClientUpdated();
         onClose();
       } else {

@@ -5,6 +5,7 @@ const Database = require('better-sqlite3');
 const dbPath = path.join(__dirname, 'db', 'cms.db');
 const db = new Database(dbPath);
 
+app.disableHardwareAcceleration();
 app.whenReady().then(() => {
   const mainWindow = new BrowserWindow({
     width: 1080,

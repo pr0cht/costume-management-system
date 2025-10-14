@@ -121,17 +121,8 @@ ipcMain.handle('edit-costume', async (event, costumeData) => {
   const { id, name, origin, type, gender, size, price, inclusions, available, img } = costumeData;
 
   try {
-    const imageBuffer = img ? Buffer.from(img) : null; 
-    const sql = `
-      UPDATE Costume
-      SET costume_Name = ?, costume_Origin = ?, costume_Type = ?, 
-          costume_Size = ?, costume_Gender = ?, costume_Price = ?, 
-          costume_Inclusion = ?, costume_Available = ?, costume_Image = ?
-      WHERE costume_ID = ?
-    `;
-    const stmt = db.prepare(sql);
-
-    const result = stmt.run(
+    let sql;
+    const params = [
       name,
       origin,
       type,
@@ -140,9 +131,33 @@ ipcMain.handle('edit-costume', async (event, costumeData) => {
       price,
       inclusions,
       available ? 1 : 0,
-      imageBuffer,
-      id
-    );
+    ];
+
+    if (img) {
+      sql = `
+        UPDATE Costume
+        SET costume_Name = ?, costume_Origin = ?, costume_Type = ?, 
+            costume_Size = ?, costume_Gender = ?, costume_Price = ?, 
+            costume_Inclusion = ?, costume_Available = ?, costume_Image = ?
+        WHERE costume_ID = ?
+      `;
+
+      const imageBuffer = Buffer.from(img);
+      params.push(imageBuffer, id);
+    } else {
+      sql = `
+        UPDATE Costume
+        SET costume_Name = ?, costume_Origin = ?, costume_Type = ?, 
+            costume_Size = ?, costume_Gender = ?, costume_Price = ?, 
+            costume_Inclusion = ?, costume_Available = ?
+        WHERE costume_ID = ?
+      `;
+      params.push(id)
+    }
+    
+    const stmt = db.prepare(sql);
+
+    const result = stmt.run(...params);
     return { success: true, changes: result.changes };
   } catch (err) {
     console.error("Database Error in main.js:", err.message);

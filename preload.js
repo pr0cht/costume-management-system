@@ -11,5 +11,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
 
   addEvent: (data) => ipcRenderer.invoke('add-event', data),
   getEvents: () => ipcRenderer.invoke('get-events'),
+  getEventsActive: () => ipcRenderer.invoke('get-events-active'),
+  getEventsPast: () => ipcRenderer.invoke('get-events-past'),
   editEvent: (data) => ipcRenderer.invoke('edit-event', data),
 });

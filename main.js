@@ -242,3 +242,63 @@ ipcMain.handle('add-event', async (event, eventData) => {
     return { success: false, error: err.message };
   }
 });
+
+ipcMain.handle('get-events', (event) => {
+  try {
+    const stmt = db.prepare('SELECT * FROM Event');
+    const events = stmt.all();
+
+    return { success: true, data: events };
+  } catch (err) {
+    console.error("Database Error in main.js:", err.message);
+    return { success: false, error: err.message };
+  }
+});
+
+ipcMain.handle('get-events-active', (event) => {
+  try {
+    const stmt = db.prepare("SELECT * FROM Event WHERE event_Date >= date('now')");
+    const events = stmt.all()
+
+    return { success: true, data: events };
+  } catch (err) {
+    console.error("Database Error in main.js:", err.message);
+    return { success: false, error: err.message };
+  }
+});
+
+ipcMain.handle('get-events-past', (event) => {
+  try {
+    const stmt = db.prepare("SELECT * FROM Event WHERE event_Date < date('now')");
+    const events = stmt.all();
+
+    return { success: true, data: events };
+  } catch (err) {
+    console.error("Database Error in main.js:", err.message);
+    return { success: false, error: err.message };
+  }
+});
+
+ipcMain.handle('edit-event', async (event, eventData) => {
+  const { id, name, date, location } = eventData;
+
+  try {
+    const sql = `
+      UPDATE Event
+      SET event_Name = ?, event_Date = ?, event_Location = ?
+      WHERE event_ID = ?
+    `;
+    const stmt = db.prepare(sql);
+
+    const result = stmt.run(
+      name,
+      date,
+      location,
+      id
+    );
+    return { success: true, changes: result.changes };
+  } catch (err) {
+    console.error("Database Error in main.js:", err.message);
+    return { success: false, error: err.message };
+  }
+});

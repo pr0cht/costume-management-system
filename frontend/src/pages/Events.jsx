@@ -1,9 +1,48 @@
+import React, { useEffect, useState } from 'react';
+import EditEventPopup from './popups/editEventPopup';
+import AddEventPopup from './popups/addEventPopup';
+
 function Events() {
-  const [filterOpen, setFilterOpen] = React.useState(false);
+  const [filterOpen, setFilterOpen] = useState(false);
+  const [events, setEvents] = useState([]);
+  const [activeEvents, setActiveEvents] = useState([]);
+  const [pastEvents, setPastEvents] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [editingEvent, setEditingEvent] = useState(null);
+
+  const fetchActiveEvents = async () => {
+    setIsLoading(true);
+    const result = await window.electronAPI.getEventsActive();
+    if (result.success) {
+      setActiveEvents(result.data);
+    } else {
+      alert(`Failed to fetch events data: ${result.error}`)
+    }
+    setIsLoading(false);
+  }
+
+  const fetchPastEvents = async () => {
+    setIsLoading(true);
+    const result = await window.electronAPI.getEventsPast();
+    if (result.success) {
+      setPastEvents(result.data);
+    } else {
+      alert(`Failed to fetch events data: ${result.error}`)
+    }
+    setIsLoading(false);
+  }
+
+
+  useEffect(() => {
+    fetchActiveEvents();
+    fetchPastEvents();
+  }, []);
+
 
   return (
     <div className="page events">
       <div className="events-topbar">
+        <AddEventPopup />
         <input
           type="text"
           className="events-search"
@@ -31,41 +70,50 @@ function Events() {
           </div>
         </div>
       )}
-      
+
       <div className="events-section">
         <h2 className="section-title">Upcoming Events</h2>
         <div className="events-grid">
-          <div className="event-item">
-            <h3 className="event-name">Anime Convention 2025</h3>
-            <p className="event-datetime">August 15, 2025 - 9:00 AM</p>
-            <button className="edit-btn button">Edit Event Details</button>
-          </div>
-          <div className="event-item">
-            <h3 className="event-name">Cosplay Competition</h3>
-            <p className="event-datetime">August 20, 2025 - 2:00 PM</p>
-            <button className="edit-btn button">Edit Event Details</button>
-          </div>
+          {isLoading ? (
+            <p>Loading events...</p>
+          ) : (
+            activeEvents.map((event) =>
+              <div className="event-item" key={event.event_ID}>
+                <h3 className="event-name">{event.event_Name}</h3>
+                <p className="event-datetime">{event.event_Date}</p>
+                <p className="event-location">{event.event_Location}</p>
+                <button className="edit-btn button" onClick={() => setEditingEvent(event)}>Edit Details</button>
+              </div>
+            )
+          )}
         </div>
       </div>
 
       <div className="events-section past-events">
         <h2 className="section-title">Past Events</h2>
         <div className="events-grid">
-          <div className="event-item">
-            <h3 className="event-name">Summer Anime Fest</h3>
-            <p className="event-datetime">July 15, 2025 - 10:00 AM</p>
-            <button className="edit-btn button">View Details</button>
-          </div>
-          <div className="event-item">
-            <h3 className="event-name">Comic Convention</h3>
-            <p className="event-datetime">July 1, 2025 - 1:00 PM</p>
-            <button className="edit-btn button">View Details</button>
-          </div>
+          {isLoading ? (
+            <p>Loading events...</p>
+          ) : (
+            pastEvents.map((event) =>
+              <div className="event-item" key={event.event_ID}>
+                <h3 className="event-name">{event.event_Name}</h3>
+                <p className="event-datetime">{event.event_Date}</p>
+                <p className="event-location">{event.event_Location}</p>
+                <button className="edit-btn button" onClick={() => setEditingEvent(event)}>Edit Details</button>
+              </div>
+            )
+          )}
         </div>
+        <EditEventPopup
+          key={editingEvent?.event_ID || 'new-event-editor'}
+          event={editingEvent}
+          onClose={() => setEditingEvent(null)}
+          onEventUpdated={fetchActiveEvents && fetchPastEvents}
+        />
       </div>
     </div>
   );
 }
 
-import React from 'react';
 export default Events;

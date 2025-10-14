@@ -13,6 +13,19 @@ function EditCostumePopup({ costume, onClose, onCostumeUpdated }) {
 
     const [imgPreview, setImgPreview] = useState(null);
 
+    const resetForm = () => {
+        setName("");
+        setOrigin("");
+        setType("cloth");
+        setSize("m");
+        setGender("unisex");
+        setPrice("");
+        setInclusions("");
+        setAvailable(true);
+        setNewImg(null);
+        setImgPreview(null);
+    };
+
     useEffect(() => {
         if (costume) {
             setName(costume.costume_Name || "");
@@ -30,6 +43,10 @@ function EditCostumePopup({ costume, onClose, onCostumeUpdated }) {
             } else {
                 setImgPreview(null);
             }
+        }
+
+        return () => {
+            resetForm();
         }
     }, [costume]);
 
@@ -185,7 +202,7 @@ function EditCostumePopup({ costume, onClose, onCostumeUpdated }) {
                     )}
                     <div className="form-actions">
                         <button type="submit">Save Changes</button>
-                        <button type="button" onClick={onClose}>Cancel</button>                        
+                        <button type="button" onClick={onClose}>Cancel</button>
                     </div>
                 </form>
             </div>

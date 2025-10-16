@@ -604,6 +604,7 @@ button:focus-visible, .button:focus,
 }
 
 .costume-item {
+  z-index: 1;
   width: 200px;
   background: white;
   border-radius: 8px;
@@ -932,6 +933,11 @@ button:focus-visible, .button:focus,
   border-radius: 4px;
   font-weight: 600;
   cursor: pointer;
+}
+
+.icon {
+  width: 25px;
+  height: 25px;
 }
 
 .button:hover {

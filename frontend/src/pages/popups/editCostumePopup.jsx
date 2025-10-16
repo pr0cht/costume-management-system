@@ -4,8 +4,8 @@ function EditCostumePopup({ costume, onClose, onCostumeUpdated }) {
     const [name, setName] = useState("");
     const [origin, setOrigin] = useState("");
     const [type, setType] = useState("Cloth");
-    const [size, setSize] = useState("m");
-    const [gender, setGender] = useState("unisex");
+    const [size, setSize] = useState("MEDIUM");
+    const [gender, setGender] = useState("Unisex");
     const [price, setPrice] = useState("");
     const [inclusions, setInclusions] = useState("");
     const [available, setAvailable] = useState(true);
@@ -17,8 +17,8 @@ function EditCostumePopup({ costume, onClose, onCostumeUpdated }) {
         setName("");
         setOrigin("");
         setType("Cloth");
-        setSize("m");
-        setGender("unisex");
+        setSize("MEDIUM");
+        setGender("Unisex");
         setPrice("");
         setInclusions("");
         setAvailable(true);
@@ -100,6 +100,21 @@ function EditCostumePopup({ costume, onClose, onCostumeUpdated }) {
 
     if (!costume) {
         return null;
+    }
+
+    const handleDeleteCostume = async () => {
+        try {
+            const result = await window.electronAPI.deleteCostume(costume.costume_ID);
+            if (result.success) {
+                onCostumeUpdated();
+                onClose();
+            } else {
+                alert(`Failed to delete costume: ${result.error}`);
+            }
+        } catch (error) {
+            console.error("Error deleting costume:", error);
+            alert("An error occurred while deleting the costume.");
+        }
     }
 
     return (
@@ -199,14 +214,16 @@ function EditCostumePopup({ costume, onClose, onCostumeUpdated }) {
                             </figure>
                         </div>
                     )}
-                    <div className="form-actions">
-                        <button type="submit">Save Changes</button>
-                        <button type="button" onClick={onClose}>Cancel</button>
+                    <div className="form-actions row">
+                        <button className="button" type="submit">Save Changes</button>
+                        <button className="button" type="button" onClick={onClose}>Cancel</button>
+                        <button className="button" type="button" onClick={handleDeleteCostume}><img className="icon" src="assets/delete.png"/></button>
                     </div>
                 </form>
             </div>
         </div>
     )
 }
+
 
 export default EditCostumePopup;

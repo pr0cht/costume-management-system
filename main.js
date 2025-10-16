@@ -99,7 +99,6 @@ ipcMain.handle('add-costume', async (event, costumeData) => {
 });
 
 ipcMain.handle('get-costumes', (event, filters) => {
-  // ✅ Log what the backend receives. Check this in your TERMINAL.
   console.log('Backend received filters:', filters);
 
   try {
@@ -107,7 +106,6 @@ ipcMain.handle('get-costumes', (event, filters) => {
     const whereClauses = [];
     const params = [];
 
-    // --- Build WHERE clauses safely ---
     if (filters?.searchTerm) {
       whereClauses.push('(costume_Name LIKE ? OR costume_Origin LIKE ?)');
       params.push(`%${filters.searchTerm}%`, `%${filters.searchTerm}%`);
@@ -133,7 +131,6 @@ ipcMain.handle('get-costumes', (event, filters) => {
       baseQuery += ` WHERE ${whereClauses.join(' AND ')}`;
     }
 
-    // --- Build ORDER BY clause safely ---
     const sortableColumns = {
       name: 'costume_Name',
       price: 'costume_Price',
@@ -208,6 +205,18 @@ ipcMain.handle('edit-costume', async (event, costumeData) => {
     return { success: true, changes: result.changes };
   } catch (err) {
     console.error("Database Error in main.js:", err.message);
+    return { success: false, error: err.message };
+  }
+});
+
+ipcMain.handle('delete-costume', (event, id) => {
+  try {
+    const stmt = db.prepare('DELETE FROM Costume WHERE costume_ID = ?');
+
+    const result = stmt.run(id);
+    return { success: true, changes: result.changes };
+  } catch (err) {
+    console.error("Database Error in main.js", err.message);
     return { success: false, error: err.message };
   }
 });

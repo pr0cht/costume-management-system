@@ -374,3 +374,64 @@ ipcMain.handle('edit-event', async (event, eventData) => {
     return { success: false, error: err.message };
   }
 });
+
+// Rental Processes
+
+ipcMain.handle('get-available-costumes', (event) => {
+  try {
+    const stmt = db.prepare('SELECT * FROM Costume WHERE costume_Available = 1');
+    const costumes = stmt.all();
+
+    const costumesWithImages = costumes.map(costume => {
+      if (costume.costume_Image) {
+        return {
+          ...costume, costume_Image: costume.costume_Image.toString('base64') }
+        }
+      return costume });
+
+    return { success: true, data: costumesWithImages
+  }} catch (error) {
+    console.error("Database Error in main.js:", error.message);
+    return { success: false, error: error.message };
+  }
+});
+
+// processes
+
+ipcMain.handle('process-rental', (event, rentalData) => {
+  const { clientId, costumeIds, rentalDate, returnDate } = rentalData;
+
+  const transaction = db.transaction(() => {
+    const transactionStmt = db.prepare('INSERT INTO Transactions (client_ID, transaction_Date, balance) VALUES (?, ?, ?)');
+    const info = transactionStmt.run(clientId, rentalDate, 0);
+    const transactionId = info.lastInsertRowid; 
+
+    const rentStmt = db.prepare(`
+      INSERT INTO Rents (transaction_ID, costume_ID, costume_Fee, rentDate, returnDate, costume_returned) 
+      VALUES (?, ?, ?, ?, ?, 0)
+    `);
+    const updateCostumeStmt = db.prepare('UPDATE Costume SET costume_Available = 0 WHERE costume_ID = ?');
+    const getCostumeFeeStmt = db.prepare('SELECT costume_Price FROM Costume WHERE costume_ID = ?');
+
+    for (const costumeId of costumeIds) {
+      const costumeInfo = getCostumeFeeStmt.get(costumeId);
+      if (!costumeInfo) {
+        throw new Error(`Costume with ID ${costumeId} not found.`); 
+      }
+      const costumeFee = costumeInfo.costume_Price;
+
+      rentStmt.run(transactionId, costumeId, costumeFee, rentalDate, returnDate);
+      updateCostumeStmt.run(costumeId);
+    }
+
+    return { transactionId }; 
+  });
+
+  try {
+    const { transactionId } = transaction(); 
+    return { success: true, transactionId: transactionId }; 
+  } catch (error) {
+    console.error("Database Error processing rental:", error.message);
+    return { success: false, error: error.message };
+  }
+});

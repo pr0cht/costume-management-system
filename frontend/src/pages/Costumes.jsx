@@ -1,6 +1,7 @@
 import React, { use, useEffect, useState } from 'react';
 import AddCostumePopup from './popups/addCostumePopup';
 import EditCostumePopup from './popups/editCostumePopup';
+import NewRentalPopup from './popups/newRentalPopup';
 
 const bufferToURL = (base64String) => {
   if (!base64String) {
@@ -14,6 +15,7 @@ function Costumes() {
   const [costumes, setCostumes] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [editingCostume, setEditingCostume] = useState(null);
+  const [rentingCostume, setRentingCostume] = useState(null);
 
   const [searchTerm, setSearchTerm] = useState('');
   const [showAvailableOnly, setShowAvailableOnly] = useState(false);
@@ -25,24 +27,24 @@ function Costumes() {
 
   const fetchCostumes = async () => {
     setIsLoading(true);
-      const filters = {
-        searchTerm,
-        available: showAvailableOnly,
-        size: filterSize,
-        gender: filterGender,
-        type: filterType,
-        sort,
-        sortOrder,
-      };
+    const filters = {
+      searchTerm,
+      available: showAvailableOnly,
+      size: filterSize,
+      gender: filterGender,
+      type: filterType,
+      sort,
+      sortOrder,
+    };
 
-      console.log("Sending filters to backend:", filters);
+    console.log("Sending filters to backend:", filters);
 
-      const result = await window.electronAPI.getCostumes(filters);
-      if (result.success) {
-        setCostumes(result.data);
-      } else {
-        alert(`Failed to fetch costumes: ${result.error}`);
-      }
+    const result = await window.electronAPI.getCostumes(filters);
+    if (result.success) {
+      setCostumes(result.data);
+    } else {
+      alert(`Failed to fetch costumes: ${result.error}`);
+    }
     setIsLoading(false);
   }
 
@@ -57,8 +59,8 @@ function Costumes() {
     return () => {
       clearTimeout(handler);
     }
-  }, 
-  [searchTerm, showAvailableOnly, filterSize, filterGender, filterType, sort, sortOrder])
+  },
+    [searchTerm, showAvailableOnly, filterSize, filterGender, filterType, sort, sortOrder])
 
   return (
     <div className="page costumes">
@@ -162,7 +164,7 @@ function Costumes() {
               <p>Status: <span className="costume-status">{costume.costume_Available ? 'Available' : 'Rented'}</span></p>
               <div className='costume-actions'>
                 <button className="edit-btn button" onClick={() => setEditingCostume(costume)}>Edit</button>
-                <button className="rent-btn button">Rent</button>
+                <button className="rent-btn button" onClick={() => setRentingCostume(costume)}>Rent</button>
               </div>
             </div>
           ))
@@ -173,6 +175,13 @@ function Costumes() {
         onClose={() => setEditingCostume(null)}
         onCostumeUpdated={fetchCostumes}
       />
+      {rentingCostume && (
+        <NewRentalPopup
+          initialCostume={rentingCostume}
+          onClose={() => setRentingCostume(null)}
+          onRentalProcessed={fetchCostumes}
+        />
+      )}
     </div>
   );
 };

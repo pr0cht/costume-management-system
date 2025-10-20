@@ -18,4 +18,6 @@ contextBridge.exposeInMainWorld('electronAPI', {
   editEvent: (data) => ipcRenderer.invoke('edit-event', data),
   deleteEvent: (id) => ipcRenderer.invoke('delete-event', id),
 
+  getAvailableCostumes: () => ipcRenderer.invoke('get-available-costumes'),
+  processRental: (data) => ipcRenderer.invoke('process-rental', data)
 });

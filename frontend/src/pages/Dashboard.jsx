@@ -3,6 +3,7 @@ import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, ArcElement, T
 import AddCostumePopup from './popups/addCostumePopup';
 import AddClientPopup from './popups/addClientPopup';
 import AddEventPopup from './popups/addEventPopup';
+import NewRentalPopup from './popups/newRentalPopup';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Title, Tooltip, Legend);
 
@@ -64,7 +65,6 @@ const Dashboard = (
     </div>
     <div className="dashboard-quick-actions">
       <AddCostumePopup />
-      <button className="action-btn button">Create Rental</button>
       <AddClientPopup />
       <AddEventPopup />
     </div>

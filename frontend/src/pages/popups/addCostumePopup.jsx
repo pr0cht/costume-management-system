@@ -92,21 +92,21 @@ function AddCostumePopup() {
               <div className="row spacebetween">
                 {/* costume name */}
                 <label>Costume Name:</label>
-                <input className="costume-text-input" type="text" name="costumeName" required
+                <input className="text-input" type="text" name="costumeName" required
                   value={name}
                   onChange={(e) => setName(e.target.value)} />
               </div>
               <div className="row spacebetween">
                 {/* costume origin */}
                 <label>Costume Origin:</label>
-                <input className="costume-text-input" type="text" name="costumeOrigin" required
+                <input className="text-input" type="text" name="costumeOrigin" required
                   value={origin}
                   onChange={(e) => setOrigin(e.target.value)} />
               </div>
               <div className="row spacebetween">
                 {/* costume type */}
                 <label>Costume Type:</label>
-                <select className="costume-select-input" name="costumeType" required
+                <select className="select-input" name="costumeType" required
                   value={type}
                   onChange={(e) => setType(e.target.value)}>
                   <option value="Cloth">Cloth</option>
@@ -119,7 +119,7 @@ function AddCostumePopup() {
               <div className="row spacebetween">
                 {/* costume size */}
                 <label>Size:</label>
-                <select className="costume-select-input" name="size" required
+                <select className="select-input" name="size" required
                   value={size}
                   onChange={(e) => setSize(e.target.value)}>
                   <option value="XSMALL">XS</option>
@@ -135,7 +135,7 @@ function AddCostumePopup() {
               <div className="row spacebetween">
                 {/* costume gender */}
                 <label>Gender:</label>
-                <select className="costume-select-input" name="gender" required
+                <select className="select-input" name="gender" required
                   value={gender}
                   onChange={(e) => setGender(e.target.value)}>
                   <option value="Male">Male</option>
@@ -147,21 +147,21 @@ function AddCostumePopup() {
               <div className="row spacebetween">
                 {/* costume price */}
                 <label>Price:</label>
-                <input className="costume-text-input" type="number" name="price" min="0" step="0.01" required
+                <input className="text-input" type="number" name="price" min="0" step="0.01" required
                   value={price}
                   onChange={(e) => setPrice(e.target.value)} />
               </div>
               <div className="row spacebetween">
                 {/* costume inclusions */}
                 <label>Inclusions:</label>
-                <input className="costume-text-input" type="text" name="inclusions"
+                <input className="text-input" type="text" name="inclusions"
                   value={inclusions}
                   onChange={(e) => setInclusions(e.target.value)} />
               </div>
               <div className="row spacebetween">
                 {/* costume availability */}
                 <label>Available:</label>
-                <input className="checkbox" type="checkbox" name="available"
+                <input className="checkbox checkbox-input" type="checkbox" name="available"
                   checked={available}
                   onChange={(e) => setAvailable(e.target.checked)} />
               </div>
@@ -181,9 +181,12 @@ function AddCostumePopup() {
                   </figure>
                 </div>
               )}
-              <button type="submit">Add Item</button>
+              <div className="form-actions row spacebetween">
+                <button type="submit">Add Item</button>
+                <button onClick={() => setShowPopup(false)}>Close</button>
+              </div>
             </form>
-            <button onClick={() => setShowPopup(false)}>Close</button>
+
           </div>
         </div>
       )}

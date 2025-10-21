@@ -34,7 +34,7 @@ form {
   box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
 }
 
-.costume-text-input {
+.text-input {
   padding: 5px;
   margin: 8px 0;
   border: 1px solid #ccc;
@@ -42,7 +42,7 @@ form {
   width: 300px;
 }
 
-.costume-select-input {
+.select-input {
   padding: 5px;
   margin: 8px 0;
   border: 1px solid #ccc;

@@ -62,25 +62,25 @@ function EditEventPopup({ event, onClose, onEventUpdated }) {
             <div className="row spacebetween">
               {/* event name */}
               <label>Event Name:</label>
-              <input className="event-text-input" type="text" name="eventName" required
+              <input className="text-input" type="text" name="eventName" required
                 value={name}
                 onChange={(e) => setName(e.target.value)} />
             </div>
             <div className="row spacebetween">
               {/* event date */}
               <label>Date:</label>
-              <input className="event-text-input" type="date" name="eventDate" required
+              <input className="text-input" type="date" name="eventDate" required
                 value={date}
                 onChange={(e) => setDate(e.target.value)} />
             </div>
             <div className="row spacebetween">
               {/* event location */}
               <label>Location:</label>
-              <input className="event-text-input" type="text" name="eventLocation" required
+              <input className="text-input" type="text" name="eventLocation" required
                 value={location}
                 onChange={(e) => setLocation(e.target.value)} />
             </div>
-            <div className="form-actions">
+            <div className="form-actions row spacebetween">
               <button type="submit">Update Details</button>
               <button type="button" onClick={onClose}>Close</button>
             </div>

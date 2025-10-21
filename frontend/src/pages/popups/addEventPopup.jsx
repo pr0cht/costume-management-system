@@ -48,25 +48,27 @@ function AddEventPopup() {
             <form className="add-event-form form" onSubmit={handleAddEvent}>
               <div className="row spacebetween">
                 <label>Event Name:</label>
-                <input className="event-text-input" type="text" name="eventName" required
+                <input className="text-input" type="text" name="eventName" required
                   value={eventName}
                   onChange={(e) => setEventName(e.target.value)} />
               </div>
               <div className="row spacebetween">
                 <label>Date:</label>
-                <input className="event-text-input" type="date" name="eventDate" required
+                <input className="text-input" type="date" name="eventDate" required
                   value={eventDate}
                   onChange={(e) => setEventDate(e.target.value)} />
               </div>
               <div className="row spacebetween">
                 <label>Location:</label>
-                <input className="event-text-input" type="text" name="eventLocation" required
+                <input className="etext-input" type="text" name="eventLocation" required
                   value={eventLocation}
                   onChange={(e) => setEventLocation(e.target.value)} />
               </div>
-              <button type="submit">Add Event</button>
+              <div className="form-actions  row spacebetween">
+                <button type="submit">Add Event</button>
+                <button onClick={() => setShowPopup(false)}>Close</button>
+              </div>
             </form>
-            <button onClick={() => setShowPopup(false)}>Close</button>
           </div>
         </div>
       )}

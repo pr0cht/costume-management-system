@@ -399,7 +399,7 @@ ipcMain.handle('get-available-costumes', (event) => {
 // processes
 
 ipcMain.handle('process-rental', (event, rentalData) => {
-  const { clientId, costumeIds, rentalDate, returnDate } = rentalData;
+  const { clientId, costumeIds, eventId, rentalDate, returnDate } = rentalData;
 
   const transaction = db.transaction(() => {
     const transactionStmt = db.prepare('INSERT INTO Transactions (client_ID, transaction_Date, balance) VALUES (?, ?, ?)');
@@ -407,8 +407,8 @@ ipcMain.handle('process-rental', (event, rentalData) => {
     const transactionId = info.lastInsertRowid; 
 
     const rentStmt = db.prepare(`
-      INSERT INTO Rents (transaction_ID, costume_ID, costume_Fee, rentDate, returnDate, costume_returned) 
-      VALUES (?, ?, ?, ?, ?, 0)
+      INSERT INTO Rents (transaction_ID, costume_ID, costume_Fee, event_ID, rentDate, returnDate, costume_returned) 
+      VALUES (?, ?, ?, ?, ?, ?, 0)
     `);
     const updateCostumeStmt = db.prepare('UPDATE Costume SET costume_Available = 0 WHERE costume_ID = ?');
     const getCostumeFeeStmt = db.prepare('SELECT costume_Price FROM Costume WHERE costume_ID = ?');
@@ -420,7 +420,7 @@ ipcMain.handle('process-rental', (event, rentalData) => {
       }
       const costumeFee = costumeInfo.costume_Price;
 
-      rentStmt.run(transactionId, costumeId, costumeFee, rentalDate, returnDate);
+      rentStmt.run(transactionId, costumeId, costumeFee, eventId, rentalDate, returnDate);
       updateCostumeStmt.run(costumeId);
     }
 

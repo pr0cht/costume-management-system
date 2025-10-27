@@ -177,7 +177,7 @@ function AddCostumePopup() {
                 <div className="row spacebetween">
                   <figure>
                     <figcaption>Image Preview:</figcaption>
-                    <img src={imgPreview} alt="Image Preview" style={{ width: '100px', height: '100px', objectFit: 'cover' }} />
+                    <img src={imgPreview} alt="Image Preview" style={{ width: '250px', height: '250px', objectFit: 'cover' }} />
                   </figure>
                 </div>
               )}

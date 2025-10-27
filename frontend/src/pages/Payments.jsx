@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-// import EditPaymentPopup from './popups/editPaymentPopup'; // Component will be added later
+import EditPaymentPopup from './popups/editPaymentPopup';
+import ConfirmationModal from './alerts/ConfirmationModal';
 
 function Payments() {
   const [filterOpen, setFilterOpen] = useState(false);
@@ -7,13 +8,14 @@ function Payments() {
   const [isLoading, setIsLoading] = useState(true);
   const [editingPayment, setEditingPayment] = useState(null);
 
-  // Filter/Sort State
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [paymentToDelete, setPaymentToDelete] = useState(null);
+
   const [searchTerm, setSearchTerm] = useState('');
   const [withBalance, setWithBalance] = useState(false);
   const [sort, setSort] = useState('date');
   const [sortOrder, setSortOrder] = useState('DESC'); // Default to recently paid
 
-  // Function to fetch data from backend
   const fetchPayments = async () => {
     setIsLoading(true);
     const filters = {
@@ -32,7 +34,6 @@ function Payments() {
     setIsLoading(false);
   };
 
-  // Debouncing Effect: Re-fetch data 500ms after user stops interacting
   useEffect(() => {
     setIsLoading(true);
     const handler = setTimeout(() => {
@@ -42,18 +43,40 @@ function Payments() {
     return () => clearTimeout(handler);
   }, [searchTerm, withBalance, sort, sortOrder]);
 
-  // Handler for actions column buttons
   const handleEdit = (payment) => {
-    // setEditingPayment(payment); // To be implemented when popup is ready
+    setEditingPayment(payment);
     console.log('Editing payment:', payment); 
   };
   
-  const handleDelete = (paymentId) => {
-    if (confirm(`Are you sure you want to delete payment record ${paymentId}? This will affect the transaction balance.`)) {
-      // Logic for delete operation (to be implemented)
-      console.log('Deleting payment ID:', paymentId); 
-    }
+  const handleDelete = (payment) => {
+    setPaymentToDelete(payment); 
+    setShowConfirmModal(true); 
   };
+
+const handleConfirmDelete = async () => {
+  setShowConfirmModal(false); 
+  
+  if (!paymentToDelete) return;
+
+  try {
+    const paymentId = paymentToDelete.payment_ID;
+
+    console.log('Confirmed deletion for ID:', paymentId);
+        const result = await window.electronAPI.deletePayment(paymentId);
+    
+    if (result.success) {
+      alert('Payment record successfully deleted and balance adjusted.');
+      
+      fetchPayments(); 
+    } else {
+      alert(`Failed to delete payment record: ${result.error}`);
+    }
+  } catch (error) {
+    console.error('Deletion failed:', error);
+    alert('An unexpected error occurred during payment deletion.');
+  }
+  setPaymentToDelete(null); 
+};
 
   return (
     <div className="page payments">
@@ -71,6 +94,16 @@ function Payments() {
         >
           Filter
         </button>
+        {showConfirmModal && (
+        <ConfirmationModal
+          message={`Are you sure you want to delete payment record ${paymentToDelete.payment_ID} by ${paymentToDelete.client_Name}? This will affect the transaction balance.`}
+          onConfirm={handleConfirmDelete}
+          onCancel={() => {
+            setShowConfirmModal(false);
+            setPaymentToDelete(null);
+          }}
+        />
+      )}
       </div>
       
       {/* --- Filter Options --- */}
@@ -135,7 +168,7 @@ function Payments() {
                   <td>{payment.payment_Remarks}</td>
                   <td>
                     <button className="edit-payment-btn button" onClick={() => handleEdit(payment)}>Edit</button>
-                    <button className="delete-payment-btn button" onClick={() => handleDelete(payment.payment_ID)}>Delete</button>
+                    <button className="delete-payment-btn button" onClick={() => handleDelete(payment)}>Delete</button>
                   </td>
                 </tr>
               ))
@@ -143,6 +176,12 @@ function Payments() {
           </tbody>
         </table>
       </div>
+      <EditPaymentPopup
+        key={editingPayment?.payment_ID || 'new-payment-editor'}
+        payment={editingPayment}
+        onClose={() => setEditingPayment(null)}
+        onPaymentUpdated={fetchPayments}
+    />
     </div>
   );
 }

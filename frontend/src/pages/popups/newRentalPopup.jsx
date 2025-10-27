@@ -169,11 +169,13 @@ const handleProcessRental = async (e) => {
                     )}
                   </div>
                 ) : (
-                  <AddClientPopup onClientAdded={async () => {
-                     const clientsResult = await window.electronAPI.getClients();
-                     if (clientsResult.success) setAllClients(clientsResult.data);
-                     setView('selectClient');
-                   }} />
+                  <div onSubmit={(e) => e.preventDefault()}>
+                    <AddClientPopup onClientAdded={async () => {
+                      const clientsResult = await window.electronAPI.getClients();
+                      if (clientsResult.success) setAllClients(clientsResult.data);
+                      setView('selectClient'); 
+                    }} />
+                  </div>
                 )
               )}
             </div>
@@ -192,7 +194,7 @@ const handleProcessRental = async (e) => {
               </div>
             </div>
           </div>
-<div className="rental-details-section row spacebetween">
+          <div className="rental-details-section row spacebetween">
             <div className="col">
               <label>Associate with Event (Optional):</label>
               {isLoadingEvents ? <p>Loading events...</p> : (
@@ -211,7 +213,6 @@ const handleProcessRental = async (e) => {
               <input type="date" value={returnDate} onChange={(e) => setReturnDate(e.target.value)} required />
             </div>
           </div>
-
           <div className="payment-section row spacebetween">
              <div className="col">
                 <label>Payment Amount:</label>

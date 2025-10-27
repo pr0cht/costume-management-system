@@ -210,7 +210,7 @@ function EditCostumePopup({ costume, onClose, onCostumeUpdated }) {
                         <div className="row spacebetween">
                             <figure>
                                 <figcaption>Image Preview:</figcaption>
-                                <img className="costume-thumbnail" src={imgPreview} alt="Image Preview" style={{ width: '100px', height: '100px', objectFit: 'cover' }} />
+                                <img className="costume-thumbnail large" src={imgPreview} alt="Image Preview" style={{ width: '100px', height: '100px', objectFit: 'cover' }} />
                             </figure>
                         </div>
                     )}

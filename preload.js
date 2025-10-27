@@ -19,6 +19,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
   deleteEvent: (id) => ipcRenderer.invoke('delete-event', id),
 
   getPayments: () => ipcRenderer.invoke('get-payments'),
+  deletePayment: (id) => ipcRenderer.invoke('delete-payment', id),
+  editPayment: (data) => ipcRenderer.invoke('edit-payment', data),
 
   getAvailableCostumes: () => ipcRenderer.invoke('get-available-costumes'),
   processRental: (data) => ipcRenderer.invoke('process-rental', data)

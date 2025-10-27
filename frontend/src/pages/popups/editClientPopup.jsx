@@ -109,7 +109,7 @@ function EditClientPopup({ client, onClose, onClientUpdated }) {
             <div className="row spacebetween">
               {/* client occupation */}
               <label>Occupation:</label>
-              <input className="=text-input" type="text" name="clientOccupation" required
+              <input className="text-input" type="text" name="clientOccupation" required
                 value={occupation}
                 onChange={(e) => setOccupation(e.target.value)} />
             </div>

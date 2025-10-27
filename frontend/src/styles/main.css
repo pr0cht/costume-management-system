@@ -629,6 +629,16 @@ button:focus-visible, .button:focus,
   justify-self: center;
 }
 
+.costume-thumbnail .small {
+  width: 150px;
+  height: 150px;
+}
+
+.costume-thumbnail .large {
+  width: 500px;
+  height: 500px;
+}
+
 .costume-thumbnail img {
   width: 100%;
   height: 100%;

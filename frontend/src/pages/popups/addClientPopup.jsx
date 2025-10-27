@@ -22,8 +22,12 @@ function AddClientPopup() {
   const handleAddClient = async (e) => {
     e.preventDefault();
 
-    try {
+    if (!name || !address || !age || !cellphone) {
+      alert("Please fill in all required client fields.");
+      return;
+    }
 
+    try {
       const clientData = {
         name,
         address,
@@ -33,13 +37,17 @@ function AddClientPopup() {
         occupation
       };
 
-      // send data to main process
-
       const result = await window.electronAPI.addClient(clientData);
+
       if (result.success) {
         alert(`Client registered with ID: ${result.lastID}`);
-        setShowPopup(false);
         resetForm();
+
+        if (onClientRegistered) {
+          onClientRegistered();
+        } else {
+          setShowPopup(false);
+        }
       } else {
         alert(`Failed to register client: ${result.error}`);
       }

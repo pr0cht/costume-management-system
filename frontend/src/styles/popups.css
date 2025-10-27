@@ -307,3 +307,7 @@ form {
     width: 100%;
     margin-top: 5px;
 }
+
+.edit-payment-btn {
+    margin-right: 5px;;
+}

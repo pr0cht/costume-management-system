@@ -152,7 +152,7 @@ function Costumes() {
         ) : (
           costumes.map((costume) => (
             <div className="costume-item" key={costume.costume_ID}>
-              <div className="costume-thumbnail">
+              <div className="costume-thumbnail small">
                 <img src={bufferToURL(costume.costume_Image)} alt={costume.costume_Name} />
               </div>
               <p><span className="costume-name">{costume.costume_Name}</span></p>

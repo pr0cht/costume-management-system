@@ -375,6 +375,140 @@ ipcMain.handle('edit-event', async (event, eventData) => {
   }
 });
 
+// payment functions
+
+ipcMain.handle('get-payments', (event, filters) => {
+  try {
+    let baseQuery = `
+      SELECT 
+        P.payment_ID,
+        P.payment_Amount,
+        P.payment_Date,
+        P.payment_Remarks,
+        T.transaction_ID,
+        T.balance,
+        C.client_ID,
+        C.client_Name
+      FROM Payment P
+      JOIN Transactions T ON P.transaction_ID = T.transaction_ID
+      JOIN Client C ON T.client_ID = C.client_ID
+    `;
+    
+    const whereClauses = [];
+    const params = [];
+
+    if (filters?.searchTerm) {
+      whereClauses.push('C.client_Name LIKE ?');
+      params.push(`%${filters.searchTerm}%`);
+    }
+    if (filters?.withBalance) {
+      whereClauses.push('T.balance > 0');
+    }
+
+    if (whereClauses.length > 0) {
+      baseQuery += ` WHERE ${whereClauses.join(' AND ')}`;
+    }
+
+    const sortColumn = {
+      date: 'P.payment_Date',
+      amount: 'P.payment_Amount',
+      balance: 'T.balance'
+    }[filters?.sort] || 'P.payment_Date';
+    
+    const sortOrder = ['ASC', 'DESC'].includes(filters?.sortOrder?.toUpperCase()) ? filters.sortOrder.toUpperCase() : 'DESC'; // Default to DESC (most recent first)
+
+    baseQuery += ` ORDER BY ${sortColumn} ${sortOrder}`;
+
+    const stmt = db.prepare(baseQuery);
+    const payments = stmt.all(...params);
+    
+    return { success: true, data: payments };
+
+  } catch (err) {
+    console.error("Database Error fetching payments:", err.message);
+    return { success: false, error: err.message };
+  }
+});
+
+ipcMain.handle('delete-payment', (event, paymentId) => {
+  const transaction = db.transaction(() => {
+    const paymentInfoStmt = db.prepare(`
+      SELECT 
+        P.transaction_ID, P.payment_Amount
+      FROM Payment P
+      WHERE P.payment_ID = ?
+    `);
+    const payment = paymentInfoStmt.get(paymentId);
+
+    if (!payment) {
+      throw new Error("Payment record not found.");
+    }
+
+    const deletePaymentStmt = db.prepare('DELETE FROM Payment WHERE payment_ID = ?');
+    deletePaymentStmt.run(paymentId);
+
+    const updateTransactionStmt = db.prepare(`
+      UPDATE Transactions
+      SET balance = balance + ?
+      WHERE transaction_ID = ?
+    `);
+    updateTransactionStmt.run(payment.payment_Amount, payment.transaction_ID);
+
+    return { success: true };
+  });
+
+  try {
+    transaction();
+    return { success: true };
+  } catch (error) {
+    console.error("Database Error during DELETE:", error.message);
+    return { success: false, error: error.message };
+  }
+});
+
+ipcMain.handle('edit-payment', (event, data) => {
+  const { paymentId, newAmount, newDate, newRemarks } = data;
+
+  if (isNaN(newAmount) || newAmount < 0) {
+    return { success: false, error: "New payment amount must be a non-negative number." };
+  }
+
+  const transaction = db.transaction(() => {
+    const oldPaymentStmt = db.prepare('SELECT transaction_ID, payment_Amount FROM Payment WHERE payment_ID = ?');
+    const oldPayment = oldPaymentStmt.get(paymentId);
+
+    if (!oldPayment) {
+      throw new Error("Original payment record not found.");
+    }
+
+    const amountDifference = oldPayment.payment_Amount - newAmount; // Old Amount - New Amount
+
+    const updatePaymentStmt = db.prepare(`
+      UPDATE Payment
+      SET payment_Amount = ?, payment_Date = ?, payment_Remarks = ?
+      WHERE payment_ID = ?
+    `);
+    updatePaymentStmt.run(newAmount, newDate, newRemarks, paymentId);
+
+    const updateTransactionStmt = db.prepare(`
+      UPDATE Transactions
+      SET balance = balance + ?
+      WHERE transaction_ID = ?
+    `);
+    updateTransactionStmt.run(amountDifference, oldPayment.transaction_ID);
+
+    return { success: true, transactionId: oldPayment.transaction_ID };
+  });
+
+  try {
+    transaction();
+    return { success: true };
+  } catch (error) {
+    console.error("Database Error during EDIT:", error.message);
+    return { success: false, error: error.message };
+  }
+});
+
 // Rental Processes
 
 ipcMain.handle('get-available-costumes', (event) => {
@@ -445,55 +579,3 @@ ipcMain.handle('process-rental', (event, rentalData) => {
 });
 
 
-ipcMain.handle('get-payments', (event, filters) => {
-  try {
-    let baseQuery = `
-      SELECT 
-        P.payment_ID,
-        P.payment_Amount,
-        P.payment_Date,
-        P.payment_Remarks,
-        T.transaction_ID,
-        T.balance,
-        C.client_ID,
-        C.client_Name
-      FROM Payment P
-      JOIN Transactions T ON P.transaction_ID = T.transaction_ID
-      JOIN Client C ON T.client_ID = C.client_ID
-    `;
-    
-    const whereClauses = [];
-    const params = [];
-
-    if (filters?.searchTerm) {
-      whereClauses.push('C.client_Name LIKE ?');
-      params.push(`%${filters.searchTerm}%`);
-    }
-    if (filters?.withBalance) {
-      whereClauses.push('T.balance > 0');
-    }
-
-    if (whereClauses.length > 0) {
-      baseQuery += ` WHERE ${whereClauses.join(' AND ')}`;
-    }
-
-    const sortColumn = {
-      date: 'P.payment_Date',
-      amount: 'P.payment_Amount',
-      balance: 'T.balance'
-    }[filters?.sort] || 'P.payment_Date';
-    
-    const sortOrder = ['ASC', 'DESC'].includes(filters?.sortOrder?.toUpperCase()) ? filters.sortOrder.toUpperCase() : 'DESC'; // Default to DESC (most recent first)
-
-    baseQuery += ` ORDER BY ${sortColumn} ${sortOrder}`;
-
-    const stmt = db.prepare(baseQuery);
-    const payments = stmt.all(...params);
-    
-    return { success: true, data: payments };
-
-  } catch (err) {
-    console.error("Database Error fetching payments:", err.message);
-    return { success: false, error: err.message };
-  }
-});

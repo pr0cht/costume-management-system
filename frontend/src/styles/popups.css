@@ -1,55 +1,309 @@
+/* --- Base Typography and Structure (Keep) --- */
+
 form {
-  font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
+    font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
+    line-height: 1.5;
+    font-weight: 400;
+
+    padding: 5%; 
+    border-radius: 10px;
 }
 
 @font-face {
-  font-family: 'Inter';
-  src: url('/assets/fonts/Inter-VariableFont_opsz,wght.ttf') format('truetype');
-  font-weight: normal;
-  font-style: normal;
+    font-family: 'Inter';
+    src: url('/assets/fonts/Inter-VariableFont_opsz,wght.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
 }
 
+/*  */
+
 .popup-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.4);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6); 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
 }
 
 .popup-content {
-  justify-content: left;
-  background: #fff;
-  padding: 30px;
-  border-radius: 15px;
-  width: 600px;
-  text-align: center;
-  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+    background: #fff;
+    padding: 0; 
+
+    border-radius: 10px;
+    width: 60%; 
+    max-width: 90%;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
+    overflow: hidden; 
+    text-align: left; 
 }
 
-.text-input {
-  padding: 5px;
-  margin: 8px 0;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  width: 300px;
+/* --- HEADER STYLES (Red Panel) --- */
+
+.popup-content h2 {
+    background-color: #E64848; 
+    color: white;
+    padding: 15px 30px;
+    margin: 0; 
+    font-size: 1.5em;
+    text-align: center;
 }
 
+.popup-content h3 {
+    color: #E64848;
+    font-size: 1.2em;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 5px;
+    margin-top: 15px;
+    margin-bottom: 10px;
+}
+
+/* --- INPUT & SELECT STYLES --- */
+
+.row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    gap: 15px;
+}
+
+.row.spacebetween {
+    justify-content: space-between;
+}
+
+.popup-content label {
+    font-weight: 600;
+    color: #333;
+    flex-shrink: 0; 
+}
+
+.text-input,
 .select-input {
-  padding: 5px;
-  margin: 8px 0;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  width: 250px;
+    padding: 10px;
+    margin: 0; 
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    width: 250px; 
+    box-sizing: border-box;
 }
 
 .checkbox {
-  padding: 5px;
+    margin-left: auto;
+}
+
+/* --- BUTTONS --- */
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 15px;
+    padding: 20px 30px;
+    border-top: 1px solid #eee;
+}
+
+.form-actions button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color 0.2s;
+}
+
+.form-actions button[type="submit"] {
+    background-color: #E64848; /* Bright Red for primary action */
+    color: white;
+}
+.form-actions button[type="submit"]:hover {
+    background-color: #7E001B; /* Darken on hover */
+}
+
+.form-actions button[type="button"] {
+    background-color: #ccc; /* Grey for cancel/close */
+    color: #333;
+}
+.form-actions button[type="button"]:hover {
+    background-color: #bbb;
+}
+
+/* --- RENTAL POPUP SPECIFIC LAYOUT (.large) --- */
+
+.popup-content.large {
+    width: 800px; /* Wider for the two-column layout */
+    max-width: 95%;
+}
+
+.rental-form-layout {
+    display: flex;
+    justify-content: space-between;
+    gap: 30px;
+    padding: 20px 30px 10px; /* Space above and below columns */
+}
+
+.rental-section {
+    width: 50%;
+    display: flex;
+    flex-direction: column;
+}
+
+.rental-section h3 {
+    text-align: center;
+    color: #7E001B; /* Darker red from your logo */
+    font-size: 1.25em;
+    padding: 8px 0;
+    margin-bottom: 15px;
+    border-bottom: 2px solid #E64848; /* Bright red underline for separation */
+}
+
+/* Client Search/Select Styling */
+.client-search-container {
+    position: relative;
+}
+
+.client-search-results {
+    position: absolute;
+    top: 100%; /* Below the input */
+    left: 0;
+    right: 0;
+    background: white;
+    border: 1px solid #ddd;
+    border-top: none;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 10;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.client-search-results li {
+    padding: 10px;
+    cursor: pointer;
+    border-bottom: 1px solid #eee;
+}
+
+.client-search-results li:hover {
+    background-color: #f0f0f0;
+}
+
+/* Selected Costume Display */
+
+.selected-costume-display {
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: #fafafa;
+}
+
+.selected-costume-section h3 {
+    margin-top: 0; 
+}
+
+.selected-costume-display .row.spacebetween {
+    align-items: flex-start;
+    gap: 15px;
+}
+
+.selected-costume-display > .row > div {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    font-size: 0.95em;
+    color: #555;
+    flex-grow: 1; 
+}
+
+.selected-costume-display p {
+    margin: 0;
+    line-height: 1.4;
+    display: flex; 
+    justify-content: space-between;
+    gap: 5px;
+}
+
+.selected-costume-display p strong {
+    color: #333;
+    font-weight: 600;
+}
+
+.selected-costume-display p:first-child strong {
+    font-size: 1.1em;
+    color: #000;
+}
+
+.view-toggle-buttons {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 20px;
+    gap: 5px;
+}
+
+.view-toggle-buttons button {
+    flex-grow: 1;
+    padding: 10px;
+    border: 1px solid #7E001B;
+    background-color: white;
+    color: #7E001B;
+    font-weight: 600;
+    transition: all 0.2s;
+    border-radius: 5px;
+}
+
+.view-toggle-buttons button.active {
+    background-color: #7E001B;
+    color: white;
+    box-shadow: 0 2px 4px rgba(126, 0, 27, 0.4);
+}
+
+.client-search-container {
+    padding: 10px;
+    border: 1px dashed #ccc; 
+    border-radius: 8px;
+    background-color: #f7f7f7;
+    text-align: center; 
+}
+
+.selected-client-display strong {
+    color: #7E001B; 
+    font-size: 1.1em;
+}
+
+.selected-client-display button {
+    background-color: #E64848;
+    color: white;
+    margin-top: 10px;
+    padding: 5px 15px;
+    border-radius: 4px;
+}
+
+.costume-thumbnail {
+    width: 150px;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 5px;
+    flex-shrink: 0;
+}
+
+.rental-details-section {
+    padding: 10px 30px;
+    display: flex;
+    gap: 30px;
+    justify-content: flex-start;
+}
+.rental-details-section > div {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+.rental-details-section input,
+.rental-details-section select {
+    width: 100%;
+    margin-top: 5px;
 }

@@ -1,5 +1,59 @@
+import React, { useState, useEffect } from 'react';
+// import EditPaymentPopup from './popups/editPaymentPopup'; // Component will be added later
+
 function Payments() {
-  const [filterOpen, setFilterOpen] = React.useState(false);
+  const [filterOpen, setFilterOpen] = useState(false);
+  const [payments, setPayments] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [editingPayment, setEditingPayment] = useState(null);
+
+  // Filter/Sort State
+  const [searchTerm, setSearchTerm] = useState('');
+  const [withBalance, setWithBalance] = useState(false);
+  const [sort, setSort] = useState('date');
+  const [sortOrder, setSortOrder] = useState('DESC'); // Default to recently paid
+
+  // Function to fetch data from backend
+  const fetchPayments = async () => {
+    setIsLoading(true);
+    const filters = {
+      searchTerm: searchTerm,
+      withBalance: withBalance,
+      sort: sort,
+      sortOrder: sortOrder,
+    };
+
+    const result = await window.electronAPI.getPayments(filters);
+    if (result.success) {
+      setPayments(result.data);
+    } else {
+      alert(`Failed to fetch payments: ${result.error}`);
+    }
+    setIsLoading(false);
+  };
+
+  // Debouncing Effect: Re-fetch data 500ms after user stops interacting
+  useEffect(() => {
+    setIsLoading(true);
+    const handler = setTimeout(() => {
+      fetchPayments();
+    }, 500);
+
+    return () => clearTimeout(handler);
+  }, [searchTerm, withBalance, sort, sortOrder]);
+
+  // Handler for actions column buttons
+  const handleEdit = (payment) => {
+    // setEditingPayment(payment); // To be implemented when popup is ready
+    console.log('Editing payment:', payment); 
+  };
+  
+  const handleDelete = (paymentId) => {
+    if (confirm(`Are you sure you want to delete payment record ${paymentId}? This will affect the transaction balance.`)) {
+      // Logic for delete operation (to be implemented)
+      console.log('Deleting payment ID:', paymentId); 
+    }
+  };
 
   return (
     <div className="page payments">
@@ -7,7 +61,9 @@ function Payments() {
         <input
           type="text"
           className="payments-search"
-          placeholder="Search payments..."
+          placeholder="Search client names..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
         />
         <button
           className="payments-filter-btn button"
@@ -16,18 +72,35 @@ function Payments() {
           Filter
         </button>
       </div>
+      
+      {/* --- Filter Options --- */}
       {filterOpen && (
         <div className="payments-filter-popup">
           <h4>Filter Options</h4>
-          <div>
-            <label><input type="checkbox" /> Recent Payments</label>
-          </div>
-          <div>
-            <label><input type="checkbox" /> With Balance</label>
+          <div className="filter-options-group">
+            <label>
+              <input type="checkbox"
+                checked={withBalance}
+                onChange={() => setWithBalance(!withBalance)}
+              /> With Outstanding Balance
+            </label>
+            
+            <label>Sort by: </label>
+            <select value={sort} onChange={(e) => setSort(e.target.value)}>
+              <option value="date">Payment Date</option>
+              <option value="amount">Amount</option>
+              <option value="balance">Balance Due</option>
+            </select>
+            
+            <select value={sortOrder} onChange={(e) => setSortOrder(e.target.value)}>
+              <option value="DESC">Latest/Highest</option>
+              <option value="ASC">Oldest/Lowest</option>
+            </select>
           </div>
         </div>
       )}
       
+      {/* --- Payments Table --- */}
       <div className="payments-table">
         <table>
           <thead>
@@ -36,31 +109,37 @@ function Payments() {
               <th>Client Name</th>
               <th>Payment Amount</th>
               <th>Payment Date</th>
-              <th>Balance</th>
+              <th>Balance Due</th>
+              <th>Remarks</th>
               <th>Actions</th>
             </tr>
           </thead>
           <tbody>
-            <tr>
-              <td>CLI001</td>
-              <td>Jane Doe</td>
-              <td>₱2,500</td>
-              <td>2025-08-09</td>
-              <td>₱500</td>
-              <td>
-                <button className="edit-payment-btn button">Edit Details</button>
-              </td>
-            </tr>
-            <tr>
-              <td>CLI002</td>
-              <td>John Smith</td>
-              <td>₱3,000</td>
-              <td>2025-08-08</td>
-              <td>₱0</td>
-              <td>
-                <button className="edit-payment-btn button">Edit Details</button>
-              </td>
-            </tr>
+            {isLoading ? (
+              <tr><td colSpan="7">Loading payments...</td></tr>
+            ) : payments.length === 0 ? (
+              <tr><td colSpan="7">No payments found.</td></tr>
+            ) : (
+              payments.map((payment) => (
+                <tr key={payment.payment_ID}>
+                  {/* Using Client ID as CLI00X format */}
+                  <td>CLI{String(payment.client_ID).padStart(3, '0')}</td> 
+                  <td>{payment.client_Name}</td>
+                  {/* Format currency */}
+                  <td>₱{payment.payment_Amount.toFixed(2)}</td> 
+                  <td>{payment.payment_Date}</td>
+                  {/* Highlight balance if outstanding */}
+                  <td style={{ fontWeight: payment.balance > 0 ? 'bold' : 'normal', color: payment.balance > 0 ? '#E64848' : '#333' }}>
+                    ₱{payment.balance.toFixed(2)}
+                  </td>
+                  <td>{payment.payment_Remarks}</td>
+                  <td>
+                    <button className="edit-payment-btn button" onClick={() => handleEdit(payment)}>Edit</button>
+                    <button className="delete-payment-btn button" onClick={() => handleDelete(payment.payment_ID)}>Delete</button>
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>
@@ -68,5 +147,4 @@ function Payments() {
   );
 }
 
-import React from 'react';
 export default Payments;

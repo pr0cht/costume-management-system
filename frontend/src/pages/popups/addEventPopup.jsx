@@ -26,7 +26,6 @@ function AddEventPopup() {
       // send data to main process
       const result = await window.electronAPI.addEvent(eventData);
       if (result.success) {
-        alert(`Event added with ID: ${result.lastID}`);
         setShowPopup(false);
         resetForm();
       } else {

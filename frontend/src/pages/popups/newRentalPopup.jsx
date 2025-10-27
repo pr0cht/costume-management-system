@@ -31,6 +31,9 @@ function NewRentalPopup({ initialCostume, onClose, onRentalProcessed }) {
   const [clientSearchTerm, setClientSearchTerm] = useState('');
   const [returnDate, setReturnDate] = useState('');
 
+  const [paymentAmount, setPaymentAmount] = useState('');
+  const [paymentRemarks, setPaymentRemarks] = useState('');
+
 useEffect(() => {
     if (initialCostume) {
       setIsLoadingClients(true);
@@ -106,6 +109,8 @@ const handleProcessRental = async (e) => {
       eventId: selectedEventId || null,
       rentalDate: new Date().toISOString().split('T')[0],
       returnDate: returnDate,
+      paymentAmount: parseFloat(paymentAmount) || 0,
+      paymentRemarks: paymentRemarks || 'Initial Rental Payment',
     };
 
     const res = await window.electronAPI.processRental(rentalData);
@@ -187,8 +192,8 @@ const handleProcessRental = async (e) => {
               </div>
             </div>
           </div>
-          <div className="rental-details-section row spacebetween">
-            <div>
+<div className="rental-details-section row spacebetween">
+            <div className="col">
               <label>Associate with Event (Optional):</label>
               {isLoadingEvents ? <p>Loading events...</p> : (
                 <select value={selectedEventId} onChange={handleEventSelect}>
@@ -201,10 +206,33 @@ const handleProcessRental = async (e) => {
                 </select>
               )}
             </div>
-            <div>
+            <div className="col">
               <label>Return Date:</label>
               <input type="date" value={returnDate} onChange={(e) => setReturnDate(e.target.value)} required />
             </div>
+          </div>
+
+          <div className="payment-section row spacebetween">
+             <div className="col">
+                <label>Payment Amount:</label>
+                <input 
+                    type="number" 
+                    min="0" 
+                    step="0.01" 
+                    value={paymentAmount} 
+                    onChange={(e) => setPaymentAmount(e.target.value)} 
+                    placeholder={`Max: ${initialCostume.costume_Price.toFixed(2)}`}
+                />
+             </div>
+             <div className="col">
+                <label>Payment Remarks:</label>
+                <input 
+                    type="text" 
+                    value={paymentRemarks} 
+                    onChange={(e) => setPaymentRemarks(e.target.value)} 
+                    placeholder="Downpayment, Full Payment, etc."
+                />
+             </div>
           </div>
           <div className="form-actions row spacebetween">
             <button type="submit">Process Rental</button>

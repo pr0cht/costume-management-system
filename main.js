@@ -399,39 +399,101 @@ ipcMain.handle('get-available-costumes', (event) => {
 // processes
 
 ipcMain.handle('process-rental', (event, rentalData) => {
-  const { clientId, costumeIds, eventId, rentalDate, returnDate } = rentalData;
+  const { clientId, costumeIds, eventId, rentalDate, returnDate, paymentAmount, paymentRemarks } = rentalData;
 
   const transaction = db.transaction(() => {
-    const transactionStmt = db.prepare('INSERT INTO Transactions (client_ID, transaction_Date, balance) VALUES (?, ?, ?)');
-    const info = transactionStmt.run(clientId, rentalDate, 0);
-    const transactionId = info.lastInsertRowid; 
-
-    const rentStmt = db.prepare(`
-      INSERT INTO Rents (transaction_ID, costume_ID, costume_Fee, event_ID, rentDate, returnDate, costume_returned) 
-      VALUES (?, ?, ?, ?, ?, ?, 0)
-    `);
-    const updateCostumeStmt = db.prepare('UPDATE Costume SET costume_Available = 0 WHERE costume_ID = ?');
     const getCostumeFeeStmt = db.prepare('SELECT costume_Price FROM Costume WHERE costume_ID = ?');
-
+    let totalCostumeFee = 0;
     for (const costumeId of costumeIds) {
       const costumeInfo = getCostumeFeeStmt.get(costumeId);
       if (!costumeInfo) {
-        throw new Error(`Costume with ID ${costumeId} not found.`); 
+        throw new Error(`Costume with ID ${costumeId} not found.`);
       }
-      const costumeFee = costumeInfo.costume_Price;
+      totalCostumeFee += costumeInfo.costume_Price; 
+    }
 
+    const initialBalance = totalCostumeFee - paymentAmount;
+    const transactionStmt = db.prepare('INSERT INTO Transactions (client_ID, transaction_Date, balance) VALUES (?, ?, ?)');
+    const info = transactionStmt.run(clientId, rentalDate, initialBalance);
+    const transactionId = info.lastInsertRowid;
+
+    const paymentStmt = db.prepare('INSERT INTO Payment (transaction_ID, payment_Date, payment_Amount, payment_Remarks) VALUES (?, ?, ?, ?)');
+    if (paymentAmount > 0) { 
+        paymentStmt.run(transactionId, rentalDate, paymentAmount, paymentRemarks || 'Initial Rental Payment');
+    }
+    const rentStmt = db.prepare(`
+      INSERT INTO Rents (transaction_ID, costume_ID, costume_Fee, event_ID, rentDate, returnDate, costume_returned)
+      VALUES (?, ?, ?, ?, ?, ?, 0)
+    `);
+    const updateCostumeStmt = db.prepare('UPDATE Costume SET costume_Available = 0 WHERE costume_ID = ?');
+
+    for (const costumeId of costumeIds) {
+      const costumeInfo = getCostumeFeeStmt.get(costumeId); 
+      const costumeFee = costumeInfo.costume_Price;
       rentStmt.run(transactionId, costumeId, costumeFee, eventId, rentalDate, returnDate);
       updateCostumeStmt.run(costumeId);
     }
-
-    return { transactionId }; 
+    return { transactionId };
   });
-
   try {
-    const { transactionId } = transaction(); 
-    return { success: true, transactionId: transactionId }; 
+    const { transactionId } = transaction();
+    return { success: true, transactionId: transactionId };
   } catch (error) {
     console.error("Database Error processing rental:", error.message);
     return { success: false, error: error.message };
+  }
+});
+
+
+ipcMain.handle('get-payments', (event, filters) => {
+  try {
+    let baseQuery = `
+      SELECT 
+        P.payment_ID,
+        P.payment_Amount,
+        P.payment_Date,
+        P.payment_Remarks,
+        T.transaction_ID,
+        T.balance,
+        C.client_ID,
+        C.client_Name
+      FROM Payment P
+      JOIN Transactions T ON P.transaction_ID = T.transaction_ID
+      JOIN Client C ON T.client_ID = C.client_ID
+    `;
+    
+    const whereClauses = [];
+    const params = [];
+
+    if (filters?.searchTerm) {
+      whereClauses.push('C.client_Name LIKE ?');
+      params.push(`%${filters.searchTerm}%`);
+    }
+    if (filters?.withBalance) {
+      whereClauses.push('T.balance > 0');
+    }
+
+    if (whereClauses.length > 0) {
+      baseQuery += ` WHERE ${whereClauses.join(' AND ')}`;
+    }
+
+    const sortColumn = {
+      date: 'P.payment_Date',
+      amount: 'P.payment_Amount',
+      balance: 'T.balance'
+    }[filters?.sort] || 'P.payment_Date';
+    
+    const sortOrder = ['ASC', 'DESC'].includes(filters?.sortOrder?.toUpperCase()) ? filters.sortOrder.toUpperCase() : 'DESC'; // Default to DESC (most recent first)
+
+    baseQuery += ` ORDER BY ${sortColumn} ${sortOrder}`;
+
+    const stmt = db.prepare(baseQuery);
+    const payments = stmt.all(...params);
+    
+    return { success: true, data: payments };
+
+  } catch (err) {
+    console.error("Database Error fetching payments:", err.message);
+    return { success: false, error: err.message };
   }
 });

@@ -377,6 +377,37 @@ ipcMain.handle('edit-event', async (event, eventData) => {
 
 // payment functions
 
+ipcMain.handle('add-payment', (event, paymentData) => {
+  const { transactionId, paymentAmount, paymentDate, paymentRemarks } = paymentData;
+
+  if (isNaN(paymentAmount) || paymentAmount <= 0) {
+    return { success: false, error: "Payment amount must be a positive number." };
+  }
+  
+  const transaction = db.transaction(() => {
+    const paymentStmt = db.prepare('INSERT INTO Payment (transaction_ID, payment_Date, payment_Amount, payment_Remarks) VALUES (?, ?, ?, ?)');
+    const paymentInfo = paymentStmt.run(transactionId, paymentDate, paymentAmount, paymentRemarks || 'Payment');
+    const paymentId = paymentInfo.lastInsertRowid;
+
+    const updateTransactionStmt = db.prepare(`
+      UPDATE Transactions
+      SET balance = balance - ?
+      WHERE transaction_ID = ?
+    `);
+    updateTransactionStmt.run(paymentAmount, transactionId);
+
+    return { paymentId };
+  });
+
+  try {
+    const { paymentId } = transaction();
+    return { success: true, paymentId };
+  } catch (error) {
+    console.error("Database Error processing new payment:", error.message);
+    return { success: false, error: error.message };
+  }
+});
+
 ipcMain.handle('get-payments', (event, filters) => {
   try {
     let baseQuery = `
@@ -509,6 +540,107 @@ ipcMain.handle('edit-payment', (event, data) => {
   }
 });
 
+ipcMain.handle('get-transactions-due', (event) => {
+  try {
+    const sql = `
+      SELECT 
+        T.transaction_ID, 
+        T.balance,
+        C.client_Name
+      FROM Transactions T
+      JOIN Client C ON T.client_ID = C.client_ID
+      WHERE T.balance > 0    /* Filter: Only include transactions with an outstanding balance */
+      ORDER BY T.transaction_Date DESC
+    `;
+    
+    const stmt = db.prepare(sql);
+    const transactions = stmt.all();
+
+    return { success: true, data: transactions };
+  } catch (err) {
+    console.error("Database Error fetching transactions due:", err.message);
+    return { success: false, error: err.message };
+  }
+});
+
+// rental functions
+
+ipcMain.handle('get-rents-history', (event, filters) => {
+  try {
+    let baseQuery = `
+      SELECT 
+        R.rent_ID, R.rentDate, R.returnDate, R.costume_Returned, R.costume_Fee,
+        C.costume_Name, C.costume_ID,
+        CL.client_Name,
+        T.balance,
+        T.transaction_ID
+      FROM Rents R
+      JOIN Costume C ON R.costume_ID = C.costume_ID
+      JOIN Transactions T ON R.transaction_ID = T.transaction_ID
+      JOIN Client CL ON T.client_ID = CL.client_ID
+    `;
+    
+    const whereClauses = [];
+    const params = [];
+
+    if (filters?.searchTerm) {
+      whereClauses.push('CL.client_Name LIKE ? OR C.costume_Name LIKE ?');
+      params.push(`%${filters.searchTerm}%`, `%${filters.searchTerm}%`);
+    }
+
+    if (whereClauses.length > 0) {
+      baseQuery += ` WHERE ${whereClauses.join(' AND ')}`;
+    }
+
+    baseQuery += ` 
+      ORDER BY 
+        R.costume_Returned ASC, 
+        R.rentDate DESC,
+        R.returnDate ASC
+    `;
+
+    const stmt = db.prepare(baseQuery);
+    const rents = stmt.all(...params);
+    
+    return { success: true, data: rents };
+
+  } catch (err) {
+    console.error("Database Error fetching rent history:", err.message);
+    return { success: false, error: err.message };
+  }
+});
+
+
+ipcMain.handle('set-costume-returned', (event, rentData) => {
+  const { rentId, costumeId, transactionId } = rentData;
+
+  const transaction = db.transaction(() => {
+    const updateRentStmt = db.prepare(`
+      UPDATE Rents
+      SET costume_Returned = 1, returnDate = date('now') 
+      WHERE rent_ID = ?
+    `);
+    updateRentStmt.run(rentId);
+
+    const updateCostumeStmt = db.prepare(`
+      UPDATE Costume
+      SET costume_Available = 1
+      WHERE costume_ID = ?
+    `);
+    updateCostumeStmt.run(costumeId);
+
+    return { success: true };
+  });
+
+  try {
+    transaction();
+    return { success: true };
+  } catch (error) {
+    console.error("Database Error setting costume as returned:", error.message);
+    return { success: false, error: error.message };
+  }
+});
+
 // Rental Processes
 
 ipcMain.handle('get-available-costumes', (event) => {
@@ -529,8 +661,6 @@ ipcMain.handle('get-available-costumes', (event) => {
     return { success: false, error: error.message };
   }
 });
-
-// processes
 
 ipcMain.handle('process-rental', (event, rentalData) => {
   const { clientId, costumeIds, eventId, rentalDate, returnDate, paymentAmount, paymentRemarks } = rentalData;

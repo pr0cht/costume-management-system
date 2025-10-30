@@ -170,11 +170,14 @@ const handleProcessRental = async (e) => {
                   </div>
                 ) : (
                   <div onSubmit={(e) => e.preventDefault()}>
-                    <AddClientPopup onClientAdded={async () => {
-                      const clientsResult = await window.electronAPI.getClients();
-                      if (clientsResult.success) setAllClients(clientsResult.data);
-                      setView('selectClient'); 
-                    }} />
+                    <AddClientPopup 
+                      onClientAdded={async () => {
+                        const clientsResult = await window.electronAPI.getClients();
+                        if (clientsResult.success) setAllClients(clientsResult.data);
+                        setView('selectClient'); 
+                      }}
+                      onCancel={() => setView('selectClient')} 
+                    />
                   </div>
                 )
               )}

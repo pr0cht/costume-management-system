@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import EditPaymentPopup from './popups/editPaymentPopup';
 import ConfirmationModal from './alerts/ConfirmationModal';
+import AddNewPayment from './popups/addNewPayment';
 
 function Payments() {
   const [filterOpen, setFilterOpen] = useState(false);
@@ -81,6 +82,9 @@ const handleConfirmDelete = async () => {
   return (
     <div className="page payments">
       <div className="payments-topbar">
+        <AddNewPayment 
+          onPaymentAdded={fetchPayments}
+        />
         <input
           type="text"
           className="payments-search"

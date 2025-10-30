@@ -4,6 +4,7 @@ import AddCostumePopup from './popups/addCostumePopup';
 import AddClientPopup from './popups/addClientPopup';
 import AddEventPopup from './popups/addEventPopup';
 import NewRentalPopup from './popups/newRentalPopup';
+import DashboardAddClient from './popups/dashboardAddClientPopup';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Title, Tooltip, Legend);
 
@@ -65,7 +66,7 @@ const Dashboard = (
     </div>
     <div className="dashboard-quick-actions">
       <AddCostumePopup />
-      <AddClientPopup />
+      <DashboardAddClient />
       <AddEventPopup />
     </div>
     <div className="dashboard-cards">

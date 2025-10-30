@@ -11,6 +11,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
   editClient: (data) => ipcRenderer.invoke('edit-client', data),
   deleteClient: (id) => ipcRenderer.invoke('delete-client', id),
 
+  getRentsHistory: (filters) => ipcRenderer.invoke('get-rents-history', filters),
+  getCostumeReturned: (data) => ipcRenderer.invoke('get-costume-returned', data),
+
   addEvent: (data) => ipcRenderer.invoke('add-event', data),
   getEvents: () => ipcRenderer.invoke('get-events'),
   getEventsActive: () => ipcRenderer.invoke('get-events-active'),
@@ -18,10 +21,12 @@ contextBridge.exposeInMainWorld('electronAPI', {
   editEvent: (data) => ipcRenderer.invoke('edit-event', data),
   deleteEvent: (id) => ipcRenderer.invoke('delete-event', id),
 
+  addPayment: (data) => ipcRenderer.invoke('add-payment', data),
   getPayments: () => ipcRenderer.invoke('get-payments'),
   deletePayment: (id) => ipcRenderer.invoke('delete-payment', id),
   editPayment: (data) => ipcRenderer.invoke('edit-payment', data),
 
   getAvailableCostumes: () => ipcRenderer.invoke('get-available-costumes'),
-  processRental: (data) => ipcRenderer.invoke('process-rental', data)
+  processRental: (data) => ipcRenderer.invoke('process-rental', data),
+  getTransactionsDue: () => ipcRenderer.invoke('get-transactions-due'),
 });

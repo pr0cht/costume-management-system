@@ -26,7 +26,9 @@ function Clients() {
   return (
     <div className="page clients">
       <div className="clients-topbar">
-        <AddClientPopup />
+        <AddClientPopup 
+          onClientRegistered={fetchClients} 
+        />
         <input
           type="text"
           className="clients-search"

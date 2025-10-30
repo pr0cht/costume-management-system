@@ -291,7 +291,7 @@ form {
     flex-shrink: 0;
 }
 
-.costume-thumbnail .large {
+.costume-thumbnail.large {
     width: 500px;
     height: 500px;
     object-fit: cover;

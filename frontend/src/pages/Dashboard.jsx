@@ -5,6 +5,7 @@ import AddClientPopup from './popups/addClientPopup';
 import AddEventPopup from './popups/addEventPopup';
 import NewRentalPopup from './popups/newRentalPopup';
 import DashboardAddClient from './popups/dashboardAddClientPopup';
+import React from 'react';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Title, Tooltip, Legend);
 
@@ -52,120 +53,122 @@ const doughnutOptions = {
   },
 };
 
-const Dashboard = (
-  <div className="page dashboard">
-        <div className="dashboard-alerts">
-      <div className="alert">
-        <span className="alert-icon">⚠️</span>
-        <span>3 costumes due for return today</span><img className="close-alert" src="assets/close.png" />
-      </div>
-      <div className="alert">
-        <span className="alert-icon">📅</span>
-        <span>2 events scheduled for tomorrow</span><img className="close-alert" src="assets/close.png" />
-      </div>
-    </div>
-    <div className="dashboard-quick-actions">
-      <AddCostumePopup />
-      <DashboardAddClient />
-      <AddEventPopup />
-    </div>
-    <div className="dashboard-cards">
-      <div className="dashboard-card flex-row">
-        <div>
-          <h2>Costumes</h2>
-          <p>155</p>
+function Dashboard({ showNotification} ) {
+  return (
+    <div className="page dashboard">
+      <div className="dashboard-alerts">
+        <div className="alert">
+          <span className="alert-icon">⚠️</span>
+          <span>3 costumes due for return today</span><img className="close-alert" src="assets/close.png" />
         </div>
-        <div>
-          <h1>Available</h1>
-          <p>145</p>   
-        </div>
-        <div>
-          <h1>Currently Rented</h1>
-          <p>10</p>
+        <div className="alert">
+          <span className="alert-icon">📅</span>
+          <span>2 events scheduled for tomorrow</span><img className="close-alert" src="assets/close.png" />
         </div>
       </div>
-      <div className="dashboard-card">
-        <h2>Revenue This Month</h2>
-        <p>₱5,600</p>
-        <small className="trend-up">↑ 12% from last month</small>
+      <div className="dashboard-quick-actions">
+        <AddCostumePopup showNotification={showNotification}/>
+        <DashboardAddClient showNotification={showNotification}/>
+        <AddEventPopup showNotification={showNotification}/>
       </div>
-      <div className="dashboard-card">
-        <h2>Rents This Month</h2>
-        <p>153</p>
+      <div className="dashboard-cards">
+        <div className="dashboard-card flex-row">
+          <div>
+            <h2>Costumes</h2>
+            <p>155</p>
+          </div>
+          <div>
+            <h1>Available</h1>
+            <p>145</p>
+          </div>
+          <div>
+            <h1>Currently Rented</h1>
+            <p>10</p>
+          </div>
+        </div>
+        <div className="dashboard-card">
+          <h2>Revenue This Month</h2>
+          <p>₱5,600</p>
+          <small className="trend-up">↑ 12% from last month</small>
+        </div>
+        <div className="dashboard-card">
+          <h2>Rents This Month</h2>
+          <p>153</p>
+        </div>
+        <div className="dashboard-card">
+          <h2>Payment Status</h2>
+          <div className="payment-stats">
+            <div>Pending: ₱3,200</div>
+            <div>Overdue: ₱1,500</div>
+            <div>Paid this week: ₱12,400</div>
+          </div>
+        </div>
       </div>
-      <div className="dashboard-card">
-        <h2>Payment Status</h2>
-        <div className="payment-stats">
-          <div>Pending: ₱3,200</div>
-          <div>Overdue: ₱1,500</div>
-          <div>Paid this week: ₱12,400</div>
+      <div className="dashboard-charts">
+        <div className="dashboard-chart">
+          <Doughnut className="chart" data={doughnutData} options={doughnutOptions} />
+        </div>
+        <div className="dashboard-chart">
+          <Bar className="chart" data={barData} options={barOptions} />
+        </div>
+      </div>
+      <div className="dashboard-info-cards">
+        <div className="dashboard-info-card">
+          <h2>Costume Rent History</h2>
+          <ul>
+            <li>2025-08-09: Elsa Dress rented by Jane Doe</li>
+            <li>2025-08-08: Iron Man rented by John Smith</li>
+            <li>2025-08-07: Pikachu rented by Alice Lee</li>
+          </ul>
+        </div>
+        <div className="dashboard-info-card">
+          <h2>Recently Added Clients</h2>
+          <ul>
+            <li>Jane Doe</li>
+            <li>John Smith</li>
+            <li>Alice Lee</li>
+          </ul>
+        </div>
+        <div className="dashboard-info-card">
+          <h2>MTO Items In Progress</h2>
+          <ul>
+            <li>Custom Witch Hat for Mark</li>
+            <li>Samurai Armor for Ken</li>
+          </ul>
+        </div>
+        <div className="dashboard-info-card">
+          <h2>Currently Rented Costumes</h2>
+          <ul>
+            <li>Elsa Dress - Jane Doe</li>
+            <li>Iron Man - John Smith</li>
+          </ul>
+        </div>
+        <div className="dashboard-info-card">
+          <h2>Upcoming Events</h2>
+          <ul>
+            <li>Elsa Dress - Jane Doe</li>
+            <li>Iron Man - John Smith</li>
+          </ul>
+        </div>
+        <div className="dashboard-info-card">
+          <h2>Recently Added Items</h2>
+          <ul>
+            <li>Elsa Dress - Jane Doe</li>
+            <li>Iron Man - John Smith</li>
+          </ul>
+        </div>
+        <div className="dashboard-info-card">
+          <h2>Most Rented This Month</h2>
+          <ul>
+            <li>Elsa Dress (12 rentals)</li>
+            <li>Iron Man Suit (8 rentals)</li>
+            <li>Pikachu Costume (6 rentals)</li>
+          </ul>
         </div>
       </div>
     </div>
-    <div className="dashboard-charts">
-      <div className="dashboard-chart">
-        <Doughnut className="chart" data={doughnutData} options={doughnutOptions} />
-      </div>      
-      <div className="dashboard-chart">
-        <Bar className="chart" data={barData} options={barOptions} />
-      </div>
-    </div>
-    <div className="dashboard-info-cards">
-      <div className="dashboard-info-card">
-        <h2>Costume Rent History</h2>
-        <ul>
-          <li>2025-08-09: Elsa Dress rented by Jane Doe</li>
-          <li>2025-08-08: Iron Man rented by John Smith</li>
-          <li>2025-08-07: Pikachu rented by Alice Lee</li>
-        </ul>
-      </div>
-      <div className="dashboard-info-card">
-        <h2>Recently Added Clients</h2>
-        <ul>
-          <li>Jane Doe</li>
-          <li>John Smith</li>
-          <li>Alice Lee</li>
-        </ul>
-      </div>
-      <div className="dashboard-info-card">
-        <h2>MTO Items In Progress</h2>
-        <ul>
-          <li>Custom Witch Hat for Mark</li>
-          <li>Samurai Armor for Ken</li>
-        </ul>
-      </div>
-      <div className="dashboard-info-card">
-        <h2>Currently Rented Costumes</h2>
-        <ul>
-          <li>Elsa Dress - Jane Doe</li>
-          <li>Iron Man - John Smith</li>
-        </ul>
-      </div>
-      <div className="dashboard-info-card">
-        <h2>Upcoming Events</h2>
-        <ul>
-          <li>Elsa Dress - Jane Doe</li>
-          <li>Iron Man - John Smith</li>
-        </ul>
-      </div>
-      <div className="dashboard-info-card">
-        <h2>Recently Added Items</h2>
-        <ul>
-          <li>Elsa Dress - Jane Doe</li>
-          <li>Iron Man - John Smith</li>
-        </ul>
-      </div>
-      <div className="dashboard-info-card">
-        <h2>Most Rented This Month</h2>
-        <ul>
-          <li>Elsa Dress (12 rentals)</li>
-          <li>Iron Man Suit (8 rentals)</li>
-          <li>Pikachu Costume (6 rentals)</li>
-        </ul>
-      </div>
-    </div>
-  </div>
-);
+  );
+}
 
 
 export default Dashboard;

@@ -1,17 +1,18 @@
 import React, { use, useEffect, useState } from "react";
+import ConfirmationModal from "../alerts/ConfirmationModal";
 
-function EditCostumePopup({ costume, onClose, onCostumeUpdated }) {
+function EditCostumePopup({ costume, onClose, onCostumeUpdated, showNotification }) {
     const [name, setName] = useState("");
     const [origin, setOrigin] = useState("");
-    const [type, setType] = useState("Cloth");
-    const [size, setSize] = useState("MEDIUM");
-    const [gender, setGender] = useState("Unisex");
+    const [type, setType] = useState("");
+    const [size, setSize] = useState("");
+    const [gender, setGender] = useState("");
     const [price, setPrice] = useState("");
     const [inclusions, setInclusions] = useState("");
     const [available, setAvailable] = useState(true);
     const [newImg, setNewImg] = useState(null);
-
     const [imgPreview, setImgPreview] = useState(null);
+    const [showConfirmModal, setShowConfirmModal] = useState(false);
 
     const resetForm = () => {
         setName("");
@@ -90,34 +91,48 @@ function EditCostumePopup({ costume, onClose, onCostumeUpdated }) {
                 onCostumeUpdated();
                 onClose();
             } else {
-                alert(`Failed to edit costume: ${result.error}`);
+                showNotification(`Failed to edit costume: ${result.error}`);
             }
         } catch (error) {
             console.error("Error editing costume:", error);
-            alert("An error occurred while editing the costume.");
+            showNotification("An error occurred while editing the costume.");
         }
+    }
+
+    const handleStartDelete = () => {
+        setShowConfirmModal(true);
+    };
+
+    const handleConfirmDelete = async () => {
+        setShowConfirmModal(false); 
+
+        try {
+            const result = await window.electronAPI.deleteCostume(costume.costume_ID);
+
+            if (result.success) {
+                showNotification(`Costume "${costume.costume_Name}" successfully deleted.`);
+
+                onCostumeUpdated();
+                onClose();
+            } else {
+                showNotification(`Failed to delete costume: ${result.error}`, 'error');
+            }
+        } catch (error) {
+            console.error("Error deleting costume:", error);
+            showNotification("An unexpected error occurred during deletion.", 'error');
+        }
+    };
+
+    if (!costume) {
+        return null;
     }
 
     if (!costume) {
         return null;
     }
 
-    const handleDeleteCostume = async () => {
-        try {
-            const result = await window.electronAPI.deleteCostume(costume.costume_ID);
-            if (result.success) {
-                onCostumeUpdated();
-                onClose();
-            } else {
-                alert(`Failed to delete costume: ${result.error}`);
-            }
-        } catch (error) {
-            console.error("Error deleting costume:", error);
-            alert("An error occurred while deleting the costume.");
-        }
-    }
-
     return (
+        <>
         <div className="popup-overlay">
             <div className="popup-content">
                 <h2>Edit {costume.costume_Name}</h2>
@@ -217,13 +232,20 @@ function EditCostumePopup({ costume, onClose, onCostumeUpdated }) {
                     <div className="form-actions row spacebetween">
                         <button className="button" type="submit">Save Changes</button>
                         <button className="button" type="button" onClick={onClose}>Cancel</button>
-                        <button className="button" type="button" onClick={handleDeleteCostume}><img className="icon" src="assets/delete.png"/></button>
+                        <button className="button" type="button" onClick={handleStartDelete}><img className="icon" src="assets/delete.png" /></button>
                     </div>
                 </form>
             </div>
         </div>
+            {showConfirmModal && (
+                <ConfirmationModal
+                    message={`Are you sure you want to permanently delete the costume "${costume.costume_Name}"? This action cannot be undone.`}
+                    onConfirm={handleConfirmDelete}
+                    onCancel={() => setShowConfirmModal(false)}
+                />
+            )}
+        </>
     )
 }
-
 
 export default EditCostumePopup;

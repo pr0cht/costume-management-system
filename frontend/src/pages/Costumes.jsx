@@ -2,6 +2,7 @@ import React, { use, useEffect, useState } from 'react';
 import AddCostumePopup from './popups/addCostumePopup';
 import EditCostumePopup from './popups/editCostumePopup';
 import NewRentalPopup from './popups/newRentalPopup';
+import AppNotification from './alerts/Notification';
 
 const bufferToURL = (base64String) => {
   if (!base64String) {
@@ -10,7 +11,7 @@ const bufferToURL = (base64String) => {
   return `data:image/png;base64,${base64String}`;
 }
 
-function Costumes() {
+function Costumes({ showNotification }) {
   const [filterOpen, setFilterOpen] = useState(false);
   const [costumes, setCostumes] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -43,7 +44,7 @@ function Costumes() {
     if (result.success) {
       setCostumes(result.data);
     } else {
-      alert(`Failed to fetch costumes: ${result.error}`);
+      showNotification(`Failed to fetch costumes: ${result.error}`);
     }
     setIsLoading(false);
   }
@@ -174,6 +175,7 @@ function Costumes() {
         costume={editingCostume}
         onClose={() => setEditingCostume(null)}
         onCostumeUpdated={fetchCostumes}
+        showNotification={showNotification}
       />
       {rentingCostume && (
         <NewRentalPopup

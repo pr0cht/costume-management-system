@@ -1,6 +1,7 @@
 import React, { useState } from "react";
+import AppNotification from "../alerts/Notification";
 
-function AddClientPopup({ onClientRegistered, onCancel }) {
+function AddClientPopup({ onClientRegistered, onCancel, showNotification }) {
   const [name, setName] = useState("");
   const [address, setAddress] = useState("");
   const [age, setAge] = useState("");
@@ -23,7 +24,7 @@ function AddClientPopup({ onClientRegistered, onCancel }) {
     e.preventDefault();
 
     if (!name || !address || !age || !cellphone) {
-      alert("Please fill in all required client fields.");
+      showNotification("Please fill in all required client fields.");
       return;
     }
 
@@ -40,7 +41,7 @@ function AddClientPopup({ onClientRegistered, onCancel }) {
       const result = await window.electronAPI.addClient(clientData);
 
       if (result.success) {
-        alert(`Client registered with ID: ${result.lastID}`);
+        showNotification(`Client registered with ID: ${result.lastID}`);
         resetForm();
 
         if (onClientRegistered) {
@@ -49,11 +50,11 @@ function AddClientPopup({ onClientRegistered, onCancel }) {
           setShowPopup(false);
         }
       } else {
-        alert(`Failed to register client: ${result.error}`);
+        showNotification(`Failed to register client: ${result.error}`);
       }
     } catch (error) {
       console.error("Error registering client:", error);
-      alert("An error occurred while registering the client.");
+      showNotification("An error occurred while registering the client.");
     }
   }
 

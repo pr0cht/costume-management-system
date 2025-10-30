@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
+import AppNotification from "../alerts/Notification";
 
-function AddEventPopup() {
+function AddEventPopup({ showNotification }) {
   const [eventName, setEventName] = useState("");
   const [eventDate, setEventDate] = useState("");
   const [eventLocation, setEventLocation] = useState("");
@@ -29,11 +30,11 @@ function AddEventPopup() {
         setShowPopup(false);
         resetForm();
       } else {
-        alert(`Failed to add event: ${result.error}`);
+        showNotification(`Failed to add event: ${result.error}`);
       }
     } catch (error) {
       console.error("Error adding event:", error);
-      alert("An error occurred while adding the event.");
+      showNotification("An error occurred while adding the event.");
     }
   }
 

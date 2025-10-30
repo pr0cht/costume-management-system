@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
+import AppNotification from "../alerts/Notification";
 
-function AddCostumePopup() {
+function AddCostumePopup({ showNotification}) {
   const [name, setName] = useState("");
   const [origin, setOrigin] = useState("");
   const [type, setType] = useState("Cloth");
@@ -53,15 +54,15 @@ function AddCostumePopup() {
 
       const result = await window.electronAPI.addCostume(costumeData);
       if (result.success) {
-        alert(`Costume added with ID: ${result.lastID}`);
+        showNotification(`Costume added with ID: ${result.lastID}`);
         setShowPopup(false);
         resetForm();
       } else {
-        alert(`Failed to add costume: ${result.error}`);
+        showNotification(`Failed to add costume: ${result.error}`);
       }
     } catch (error) {
       console.error("Error adding costume:", error);
-      alert("An error occurred while adding the costume.");
+      showNotification("An error occurred while adding the costume.");
     }
   }
 

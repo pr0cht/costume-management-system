@@ -1,4 +1,5 @@
 import React, { use, useEffect, useState } from "react";
+import AppNotification from "../alerts/Notification";
 
 function EditClientPopup({ client, onClose, onClientUpdated }) {
   const [name, setName] = useState("");
@@ -53,11 +54,11 @@ function EditClientPopup({ client, onClose, onClientUpdated }) {
         onClientUpdated();
         onClose();
       } else {
-        alert(`Failed to edit client details: ${result.error}`);
+        showNotification(`Failed to edit client details: ${result.error}`);
       }
     } catch (error) {
       console.error("Error editing client details:", error);
-      alert("An error occurred while editing client details.");
+      showNotification("An error occurred while editing client details.");
     }
   }
 

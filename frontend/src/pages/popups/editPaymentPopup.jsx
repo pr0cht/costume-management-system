@@ -1,40 +1,34 @@
 import React, { useEffect, useState } from "react";
+import AppNotification from "../alerts/Notification";
 
-// The component receives the full payment object as a prop
 function EditPaymentPopup({ payment, onClose, onPaymentUpdated }) {
-    // State to hold the editable fields
     const [paymentAmount, setPaymentAmount] = useState('');
     const [paymentDate, setPaymentDate] = useState('');
     const [paymentRemarks, setPaymentRemarks] = useState('');
 
-    // Function to reset form state (optional but good practice)
     const resetForm = () => {
         setPaymentAmount('');
         setPaymentDate('');
         setPaymentRemarks('');
     };
 
-    // UseEffect to populate the form when a new payment object is passed
     useEffect(() => {
         if (payment) {
-            // Populate state from the payment object
             setPaymentAmount(payment.payment_Amount.toString() || '');
             setPaymentDate(payment.payment_Date || new Date().toISOString().split('T')[0]);
             setPaymentRemarks(payment.payment_Remarks || '');
         }
 
-        // Cleanup function to reset state when the popup closes
         return () => {
             resetForm();
         };
-    }, [payment]); // Reruns whenever the payment prop changes
+    }, [payment]);
 
     const handleEditPayment = async (e) => {
         e.preventDefault();
 
-        // 1. Basic validation
         if (parseFloat(paymentAmount) <= 0) {
-            alert("Payment amount must be greater than zero.");
+            showNotification("Payment amount must be greater than zero.");
             return;
         }
 
@@ -46,23 +40,21 @@ function EditPaymentPopup({ payment, onClose, onPaymentUpdated }) {
                 newRemarks: paymentRemarks,
             };
 
-            // Send data to the main process
             const result = await window.electronAPI.editPayment(updatedPaymentData);
 
             if (result.success) {
-                alert(`Payment record successfully updated.`);
-                onPaymentUpdated(); // Refresh the parent table data
-                onClose();          // Close the popup
+                showNotification(`Payment record successfully updated.`);
+                onPaymentUpdated();
+                onClose();
             } else {
-                alert(`Failed to edit payment: ${result.error}`);
+                showNotification(`Failed to edit payment: ${result.error}`);
             }
         } catch (error) {
             console.error("Error editing payment:", error);
-            alert("An error occurred while editing the payment record.");
+            showNotification("An error occurred while editing the payment record.");
         }
     };
 
-    // If no payment object is passed, render nothing (popup is closed)
     if (!payment) {
         return null;
     }

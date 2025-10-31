@@ -26,7 +26,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
   deletePayment: (id) => ipcRenderer.invoke('delete-payment', id),
   editPayment: (data) => ipcRenderer.invoke('edit-payment', data),
 
+  addCharge: (data) => ipcRenderer.invoke('add-charge', data),
+
   getAvailableCostumes: () => ipcRenderer.invoke('get-available-costumes'),
   processRental: (data) => ipcRenderer.invoke('process-rental', data),
-  getTransactionsDue: () => ipcRenderer.invoke('get-transactions-due'),
+  getTransactionsDue: () => ipcRenderer.invoke('get-recent-transactions'),
+  getTransactionsByClient: (clientId) => ipcRenderer.invoke('get-transactions-by-client', clientId),
 });

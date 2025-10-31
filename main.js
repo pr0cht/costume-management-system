@@ -540,16 +540,17 @@ ipcMain.handle('edit-payment', (event, data) => {
   }
 });
 
-ipcMain.handle('get-transactions-due', (event) => {
+ipcMain.handle('get-recent-transactions', (event) => {
   try {
     const sql = `
       SELECT 
         T.transaction_ID, 
         T.balance,
-        C.client_Name
+        CL.client_Name,
+        T.transaction_Date 
       FROM Transactions T
-      JOIN Client C ON T.client_ID = C.client_ID
-      WHERE T.balance > 0    /* Filter: Only include transactions with an outstanding balance */
+      JOIN Client CL ON T.client_ID = CL.client_ID
+      /* Order by Transaction Date Descending (most recent first) */
       ORDER BY T.transaction_Date DESC
     `;
     
@@ -558,7 +559,7 @@ ipcMain.handle('get-transactions-due', (event) => {
 
     return { success: true, data: transactions };
   } catch (err) {
-    console.error("Database Error fetching transactions due:", err.message);
+    console.error("Database Error fetching recent transactions:", err.message);
     return { success: false, error: err.message };
   }
 });
@@ -708,4 +709,65 @@ ipcMain.handle('process-rental', (event, rentalData) => {
   }
 });
 
+ipcMain.handle('get-transactions-by-client', (event, clientId) => {
+  try {
+    const sql = `
+      SELECT 
+        T.transaction_ID, 
+        T.balance,
+        CL.client_Name,
+        T.client_ID,
+        T.transaction_Date 
+      FROM Transactions T
+      JOIN Client CL ON T.client_ID = CL.client_ID
+      WHERE T.client_ID = ? /* <-- FILTER by the client ID */
+      ORDER BY T.transaction_Date DESC
+    `;
+    
+    const stmt = db.prepare(sql);
+    // Use the clientId parameter to safely filter the transactions
+    const transactions = stmt.all(clientId); 
 
+    return { success: true, data: transactions };
+  } catch (err) {
+    console.error("Database Error fetching client transactions:", err.message);
+    return { success: false, error: err.message };
+  }
+});
+
+
+// charges
+
+ipcMain.handle('add-charge', (event, chargeData) => {
+  const { transactionId, amount, description, chargeDate } = chargeData;
+
+  if (isNaN(amount) || amount <= 0) {
+    return { success: false, error: "Charge amount must be a positive number." };
+  }
+
+  const transaction = db.transaction(() => {
+    const chargeStmt = db.prepare(`
+      INSERT INTO Charges (transaction_ID, charge_Date, charge_Description, charge_Amount) 
+      VALUES (?, ?, ?, ?)
+    `);
+    const chargeInfo = chargeStmt.run(transactionId, chargeDate, description, amount);
+    const chargeId = chargeInfo.lastInsertRowid;
+
+    const updateTransactionStmt = db.prepare(`
+      UPDATE Transactions
+      SET balance = balance + ?
+      WHERE transaction_ID = ?
+    `);
+    updateTransactionStmt.run(amount, transactionId);
+
+    return { chargeId };
+  });
+
+  try {
+    const { chargeId } = transaction();
+    return { success: true, chargeId };
+  } catch (error) {
+    console.error("Database Error processing charge:", error.message);
+    return { success: false, error: error.message };
+  }
+});

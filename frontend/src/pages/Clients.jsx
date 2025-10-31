@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import AddClientPopup from './popups/addClientPopup';
 import EditClientPopup from './popups/editClientPopup';
+import AddChargePopup from './popups/addChargePopup';
 
 function Clients() {
   const [filterOpen, setFilterOpen] = useState(false);
   const [clients, setClients] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [editingClient, setEditingClient] = useState(null);
+  const [chargingClient, setChargingClient] = useState(null);
 
   const fetchClients = async () => {
     setIsLoading(true);
@@ -74,6 +76,7 @@ function Clients() {
               <div className="client-actions">
                 <button className="edit-btn button" onClick={() => setEditingClient(client)}>Edit Details</button>
                 <button className="payments-btn button">Payments</button>
+                <button className="charge-btn button" onClick={() => setChargingClient(client)}>Charge</button>
               </div>
             </div>
           ))
@@ -84,6 +87,13 @@ function Clients() {
         onClose={() => setEditingClient(null)}
         onClientUpdated={fetchClients}
       />
+      {chargingClient && (
+      <AddChargePopup
+          client={chargingClient}
+          onClose={() => setChargingClient(null)}
+          onChargeAdded={fetchClients} 
+          />
+      )}
     </div>
   );
 }

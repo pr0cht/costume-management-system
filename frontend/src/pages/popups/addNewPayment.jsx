@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import AppNotification from "../alerts/Notification";
 
 function AddNewPayment({ onClose, onPaymentAdded }) {
     const [showPopup, setShowPopup] = useState(false); 
@@ -47,12 +48,12 @@ function AddNewPayment({ onClose, onPaymentAdded }) {
         e.preventDefault();
 
         if (!selectedTransactionId || !paymentAmount || parseFloat(paymentAmount) <= 0) {
-            alert("Please select a transaction and enter a valid payment amount.");
+            showNotification("Please select a transaction and enter a valid payment amount.");
             return;
         }
         
         if (selectedTransactionDetails && parseFloat(paymentAmount) > selectedTransactionDetails.balance) {
-            alert(`Cannot overpay. Remaining balance is ₱${selectedTransactionDetails.balance.toFixed(2)}.`);
+            showNotification(`Cannot overpay. Remaining balance is ₱${selectedTransactionDetails.balance.toFixed(2)}.`);
             return;
         }
 
@@ -65,11 +66,11 @@ function AddNewPayment({ onClose, onPaymentAdded }) {
 
         const result = await window.electronAPI.addPayment(paymentData);
         if (result.success) {
-            alert(`Payment recorded successfully! Payment ID: ${result.paymentId}`);
+            showNotification(`Payment recorded successfully! Payment ID: ${result.paymentId}`);
             onPaymentAdded(); 
             setShowPopup(false); 
         } else {
-            alert(`Failed to record payment: ${result.error}`);
+            showNotification(`Failed to record payment: ${result.error}`);
         }
     };
 

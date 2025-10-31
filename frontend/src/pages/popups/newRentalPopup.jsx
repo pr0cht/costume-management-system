@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useMemo } from "react";
 import AddClientPopup from "./addClientPopup";
+import AppNotification from "../alerts/Notification";
 
 const bufferToURL = (base64String) => {
   if (!base64String) return null;
@@ -99,7 +100,7 @@ const handleEventSelect = (e) => {
 const handleProcessRental = async (e) => {
     e.preventDefault();
     if (!selectedClientId || !returnDate) {
-      alert("Please select a client and a return date.");
+      showNotification("Please select a client and a return date.");
       return;
     }
 
@@ -115,11 +116,11 @@ const handleProcessRental = async (e) => {
 
     const res = await window.electronAPI.processRental(rentalData);
     if (res.success) {
-      alert(`Rental processed successfully! Transaction ID: ${res.transactionId}`); 
+      showNotification(`Rental processed successfully! Transaction ID: ${res.transactionId}`); 
       onRentalProcessed();
       onClose();
     } else {
-      alert(`Failed to process rental: ${res.error}`);
+      showNotification(`Failed to process rental: ${res.error}`);
     }
   };
 

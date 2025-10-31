@@ -1,4 +1,5 @@
 import React, { use, useEffect, useState } from "react";
+import AppNotification from "../alerts/Notification";
 
 function EditEventPopup({ event, onClose, onEventUpdated }) {
   const [name, setName] = useState("");
@@ -41,11 +42,11 @@ function EditEventPopup({ event, onClose, onEventUpdated }) {
         onEventUpdated();
         onClose();
       } else {
-        alert(`Failed to edit event details: ${result.error}`);
+        showNotification(`Failed to edit event details: ${result.error}`);
       }
     } catch (error) {
       console.error("Error editing event details:", error);
-      alert("An error occurred while editing event details.");
+      showNotification("An error occurred while editing event details.");
     }
   }
 

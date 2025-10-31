@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import AppNotification from "../alerts/Notification";
 
-function AddCostumePopup({ showNotification}) {
+function AddCostumePopup({ showNotification, onCostumeAdded }) {
   const [name, setName] = useState("");
   const [origin, setOrigin] = useState("");
   const [type, setType] = useState("Cloth");
@@ -33,38 +33,43 @@ function AddCostumePopup({ showNotification}) {
     e.preventDefault();
 
     try {
-      let arrayBuffer = null;
-      if (img) {
-        arrayBuffer = await img.arrayBuffer();
-      }
+        let arrayBuffer = null;
+        if (img) {
+            arrayBuffer = await img.arrayBuffer();
+        }
 
-      const costumeData = {
-        name,
-        origin,
-        type,
-        size,
-        gender,
-        price: parseFloat(price) || 0,
-        inclusions,
-        available,
-        img: arrayBuffer,
-      };
+        const costumeData = {
+            name: name,
+            origin: origin,
+            type: type,
+            size: size,
+            gender: gender,
+            price: parseFloat(price),
+            inclusions: inclusions,
+            available: available,
+            img: arrayBuffer ? Array.from(new Uint8Array(arrayBuffer)) : null,
+        }; 
 
-      // send data to main process
+        const result = await window.electronAPI.addCostume(costumeData);
 
-      const result = await window.electronAPI.addCostume(costumeData);
-      if (result.success) {
-        showNotification(`Costume added with ID: ${result.lastID}`);
-        setShowPopup(false);
-        resetForm();
-      } else {
-        showNotification(`Failed to add costume: ${result.error}`);
-      }
+        if (result.success) {
+            showNotification(`Costume added with ID: ${result.lastID}`);
+            
+            if (onCostumeAdded) { 
+                onCostumeAdded();
+            }
+            
+            resetForm(); 
+            setShowPopup(false); 
+
+        } else {
+            showNotification(`Failed to add costume: ${result.error}`, 'error');
+        }
     } catch (error) {
-      console.error("Error adding costume:", error);
-      showNotification("An error occurred while adding the costume.");
+        console.error("Error adding costume:", error);
+        showNotification("An error occurred while adding the costume.", 'error');
     }
-  }
+}
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];

@@ -7,6 +7,9 @@
 
     align-self: center;
     justify-self: center;
+
+    margin: 5px;
+    border-radius: 5px;
 }
 
 .costume-thumbnail.large {

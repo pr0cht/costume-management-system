@@ -7,7 +7,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   deleteCostume: (id) => ipcRenderer.invoke('delete-costume', id),
 
   addClient: (data) => ipcRenderer.invoke('add-client', data),
-  getClients: () => ipcRenderer.invoke('get-clients'),
+  getClients: (filters) => ipcRenderer.invoke('getClientsSummary', filters),
   editClient: (data) => ipcRenderer.invoke('edit-client', data),
   deleteClient: (id) => ipcRenderer.invoke('delete-client', id),
 
@@ -32,4 +32,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   processRental: (data) => ipcRenderer.invoke('process-rental', data),
   getTransactionsDue: () => ipcRenderer.invoke('get-recent-transactions'),
   getTransactionsByClient: (clientId) => ipcRenderer.invoke('get-transactions-by-client', clientId),
+  getGeneralStats: () => ipcRenderer.invoke('get-general-stats'),
+  getDashboardLists: () => ipcRenderer.invoke('get-dashboard-lists'),
+  getRecentClients: () => ipcRenderer.invoke('get-recent-clients'),
 });

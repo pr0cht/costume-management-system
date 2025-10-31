@@ -66,7 +66,7 @@ function Costumes({ showNotification }) {
   return (
     <div className="page costumes">
       <div className="costumes-topbar">
-        <AddCostumePopup />
+        <AddCostumePopup  showNotification={showNotification} onCostumeAdded={fetchCostumes}/>
         <input
           type="text"
           className="costumes-search"
@@ -182,6 +182,7 @@ function Costumes({ showNotification }) {
           initialCostume={rentingCostume}
           onClose={() => setRentingCostume(null)}
           onRentalProcessed={fetchCostumes}
+          showNotification={showNotification}
         />
       )}
     </div>

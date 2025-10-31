@@ -250,14 +250,51 @@ ipcMain.handle('add-client', async (event, clientData) => {
   }
 });
 
-ipcMain.handle('get-clients', (event) => {
+ipcMain.handle('getClientsSummary', (event, filters) => {
   try {
-    const stmt = db.prepare('SELECT * FROM Client');
-    const clients = stmt.all();
+    let baseQuery = `
+      SELECT 
+        C.*, /* Select all columns from Client */
+        SUM(CASE WHEN R.costume_Returned = 0 THEN 1 ELSE 0 END) AS rented_count,
+        SUM(CASE WHEN R.costume_Returned = 0 AND T.balance > 0 THEN 1 ELSE 0 END) AS pending_due_count,
+        COALESCE(SUM(T.balance), 0) AS total_balance_due
+      FROM Client C
+      LEFT JOIN Transactions T ON C.client_ID = T.client_ID
+      LEFT JOIN Rents R ON T.transaction_ID = R.transaction_ID
+    `;
+    
+    const whereClauses = [];
+    const params = [];
 
+    if (filters?.searchTerm) {
+      whereClauses.push('C.client_Name LIKE ?');
+      params.push(`%${filters.searchTerm}%`);
+    }
+    
+    const havingClauses = [];
+    if (filters?.hasBalance) {
+      havingClauses.push('total_balance_due > 0');
+    }
+
+    if (whereClauses.length > 0) {
+      baseQuery += ` WHERE ${whereClauses.join(' AND ')}`;
+    }
+    
+    baseQuery += ` GROUP BY C.client_ID `;
+
+    if (havingClauses.length > 0) {
+      baseQuery += ` HAVING ${havingClauses.join(' AND ')}`;
+    }
+
+    baseQuery += ` ORDER BY C.client_Name ASC `; 
+    
+    const stmt = db.prepare(baseQuery);
+    const clients = stmt.all(...params);
+    
     return { success: true, data: clients };
+
   } catch (err) {
-    console.error("Database Error in main.js:", err.message);
+    console.error("Database Error fetching clients summary:", err.message);
     return { success: false, error: err.message };
   }
 });
@@ -769,5 +806,102 @@ ipcMain.handle('add-charge', (event, chargeData) => {
   } catch (error) {
     console.error("Database Error processing charge:", error.message);
     return { success: false, error: error.message };
+  }
+});
+
+// dashboard
+
+ipcMain.handle('get-general-stats', (event) => {
+  try {
+    const totalCostumesStmt = db.prepare('SELECT COUNT(costume_ID) AS total FROM Costume');
+    const availableCostumesStmt = db.prepare('SELECT COUNT(costume_ID) AS available FROM Costume WHERE costume_Available = 1');
+    const rentedCostumesStmt = db.prepare('SELECT COUNT(costume_ID) AS rented FROM Costume WHERE costume_Available = 0');
+    const totalBalanceStmt = db.prepare('SELECT COALESCE(SUM(balance), 0) AS total_due FROM Transactions WHERE balance > 0');
+    const totalClientsStmt = db.prepare('SELECT COUNT(client_ID) AS total_clients FROM Client');
+    
+    return { 
+      success: true, 
+      data: {
+        total: totalCostumesStmt.get().total,
+        available: availableCostumesStmt.get().available,
+        rented: rentedCostumesStmt.get().rented,
+        totalBalanceDue: totalBalanceStmt.get().total_due,
+        totalClients: totalClientsStmt.get().total_clients
+      }
+    };
+  } catch (err) {
+    console.error("Dashboard Error (General Stats):", err.message);
+    return { success: false, error: err.message };
+  }
+});
+
+ipcMain.handle('get-dashboard-lists', (event) => {
+  try {
+    const today = new Date().toISOString().split('T')[0];
+    const twoDaysFromNow = new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+    
+    // 1. Unreturned/Overdue Alert (Assuming due date is returnDate)
+    const returnsDueStmt = db.prepare(`
+      SELECT COUNT(rent_ID) AS count 
+      FROM Rents
+      WHERE costume_Returned = 0 AND returnDate <= date('now')
+    `);
+    
+    // 2. Upcoming Events Alert (Events scheduled for today or tomorrow)
+    const upcomingEventsStmt = db.prepare(`
+      SELECT event_Name, event_Date FROM Event
+      WHERE event_Date >= date('now')
+      ORDER BY event_Date ASC LIMIT 5
+    `);
+    
+    // 3. Recently Rented Costumes (JOIN Rents, Costume, Client)
+    const recentRentalsStmt = db.prepare(`
+      SELECT 
+        R.rentDate, C.costume_Name, CL.client_Name 
+      FROM Rents R
+      JOIN Costume C ON R.costume_ID = C.costume_ID
+      JOIN Transactions T ON R.transaction_ID = T.transaction_ID
+      JOIN Client CL ON T.client_ID = CL.client_ID
+      ORDER BY R.rentDate DESC LIMIT 5
+    `);
+    
+    // 4. Recently Added Clients
+    const recentClientsStmt = db.prepare(`
+      SELECT client_Name 
+      FROM Client 
+      ORDER BY client_ID DESC LIMIT 3
+    `);
+
+    return {
+      success: true,
+      data: {
+        returnsDueCount: returnsDueStmt.get().count,
+        upcomingEventsList: upcomingEventsStmt.all(),
+        recentRentals: recentRentalsStmt.all(),
+        recentClients: recentClientsStmt.all()
+      }
+    };
+  } catch (err) {
+    console.error("Dashboard Error (List Data):", err.message);
+    return { success: false, error: err.message };
+  }
+});
+
+ipcMain.handle('get-recent-clients', (event) => {
+  try {
+    const recentClientsStmt = db.prepare(`
+      SELECT client_ID, client_Name 
+      FROM Client 
+      ORDER BY client_ID DESC 
+      LIMIT 5
+    `);
+    
+    return { 
+      success: true, 
+      data: recentClientsStmt.all()
+    };
+  } catch (err) {
+    console.error("Dashboard Error (Recent Clients):", err.message);
+    return { success: false, error: err.message };
   }
 });

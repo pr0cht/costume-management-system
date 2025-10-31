@@ -11,7 +11,7 @@ function AddChargePopup({ client, onClose, onChargeAdded }) {
     const [chargeDate, setChargeDate] = useState(new Date().toISOString().split('T')[0]);
 
     useEffect(() => {
-        if (client) {
+        if (client && client.client_ID) {
             setIsLoadingTransactions(true);
 
             const fetchTransactionsForClient = async () => {

@@ -19,11 +19,11 @@ const addDaysToDate = (dateString, days) => {
   }
 };
 
-function NewRentalPopup({ initialCostume, onClose, onRentalProcessed }) {
+function NewRentalPopup({ initialCostume, onClose, onRentalProcessed, showNotification }) {
   const [view, setView] = useState('selectClient');
   const [allClients, setAllClients] = useState([]);
   const [isLoadingClients, setIsLoadingClients] = useState(true);
-  const [allActiveEvents, setAllActiveEvents] = useState([]); 
+  const [allActiveEvents, setAllActiveEvents] = useState([]);
   const [isLoadingEvents, setIsLoadingEvents] = useState(true);
 
   const [selectedClientId, setSelectedClientId] = useState('');
@@ -35,7 +35,7 @@ function NewRentalPopup({ initialCostume, onClose, onRentalProcessed }) {
   const [paymentAmount, setPaymentAmount] = useState('');
   const [paymentRemarks, setPaymentRemarks] = useState('');
 
-useEffect(() => {
+  useEffect(() => {
     if (initialCostume) {
       setIsLoadingClients(true);
       setIsLoadingEvents(true);
@@ -67,22 +67,22 @@ useEffect(() => {
     }
   }, [initialCostume]);
 
-const filteredClients = useMemo(() => {
+  const filteredClients = useMemo(() => {
     if (!clientSearchTerm) {
-      return []; 
+      return [];
     }
     return allClients.filter(client =>
       client.client_Name.toLowerCase().includes(clientSearchTerm.toLowerCase())
     );
   }, [clientSearchTerm, allClients]);
 
-const handleClientSelect = (client) => {
+  const handleClientSelect = (client) => {
     setSelectedClientId(client.client_ID);
     setSelectedClientName(client.client_Name);
-    setClientSearchTerm(''); 
+    setClientSearchTerm('');
   };
 
-const handleEventSelect = (e) => {
+  const handleEventSelect = (e) => {
     const eventId = e.target.value;
     setSelectedEventId(eventId);
 
@@ -97,7 +97,7 @@ const handleEventSelect = (e) => {
     }
   };
 
-const handleProcessRental = async (e) => {
+  const handleProcessRental = async (e) => {
     e.preventDefault();
     if (!selectedClientId || !returnDate) {
       showNotification("Please select a client and a return date.");
@@ -116,7 +116,7 @@ const handleProcessRental = async (e) => {
 
     const res = await window.electronAPI.processRental(rentalData);
     if (res.success) {
-      showNotification(`Rental processed successfully! Transaction ID: ${res.transactionId}`); 
+      showNotification(`Rental processed successfully! Transaction ID: ${res.transactionId}`);
       onRentalProcessed();
       onClose();
     } else {
@@ -154,7 +154,7 @@ const handleProcessRental = async (e) => {
                           value={clientSearchTerm}
                           onChange={(e) => setClientSearchTerm(e.target.value)}
                           placeholder="Start typing client name..."
-                          required={!selectedClientId} 
+                          required={!selectedClientId}
                         />
                         {/* display search results */}
                         {filteredClients.length > 0 && (
@@ -170,16 +170,14 @@ const handleProcessRental = async (e) => {
                     )}
                   </div>
                 ) : (
-                  <div onSubmit={(e) => e.preventDefault()}>
-                    <AddClientPopup 
-                      onClientAdded={async () => {
-                        const clientsResult = await window.electronAPI.getClients();
-                        if (clientsResult.success) setAllClients(clientsResult.data);
-                        setView('selectClient'); 
-                      }}
-                      onCancel={() => setView('selectClient')} 
-                    />
-                  </div>
+                  <AddClientPopup 
+                    onClientRegistered={async () => {
+                      const clientsResult = await window.electronAPI.getClients();
+                      if (clientsResult.success) setAllClients(clientsResult.data);
+                      setView('selectClient'); 
+                    }}
+                    onCancel={() => setView('selectClient')} 
+                  />
                 )
               )}
             </div>
@@ -187,7 +185,7 @@ const handleProcessRental = async (e) => {
               <h3>Costume Details</h3>
               <div className="selected-costume-display">
                 <div className="row spacebetween">
-                  <img className="costume-thumbnail"src={bufferToURL(initialCostume.costume_Image)} alt={initialCostume.costume_Name} />
+                  <img className="costume-thumbnail" src={bufferToURL(initialCostume.costume_Image)} alt={initialCostume.costume_Name} />
                   <div>
                     <p><strong>Name:</strong> {initialCostume.costume_Name}</p>
                     <p><strong>Origin:</strong> {initialCostume.costume_Origin}</p>
@@ -218,26 +216,26 @@ const handleProcessRental = async (e) => {
             </div>
           </div>
           <div className="payment-section row spacebetween">
-             <div className="col">
-                <label>Payment Amount:</label>
-                <input 
-                    type="number" 
-                    min="0" 
-                    step="0.01" 
-                    value={paymentAmount} 
-                    onChange={(e) => setPaymentAmount(e.target.value)} 
-                    placeholder={`Max: ${initialCostume.costume_Price.toFixed(2)}`}
-                />
-             </div>
-             <div className="col">
-                <label>Payment Remarks:</label>
-                <input 
-                    type="text" 
-                    value={paymentRemarks} 
-                    onChange={(e) => setPaymentRemarks(e.target.value)} 
-                    placeholder="Downpayment, Full Payment, etc."
-                />
-             </div>
+            <div className="col">
+              <label>Payment Amount:</label>
+              <input
+                type="number"
+                min="0"
+                step="0.01"
+                value={paymentAmount}
+                onChange={(e) => setPaymentAmount(e.target.value)}
+                placeholder={`Max: ${initialCostume.costume_Price.toFixed(2)}`}
+              />
+            </div>
+            <div className="col">
+              <label>Payment Remarks:</label>
+              <input
+                type="text"
+                value={paymentRemarks}
+                onChange={(e) => setPaymentRemarks(e.target.value)}
+                placeholder="Downpayment, Full Payment, etc."
+              />
+            </div>
           </div>
           <div className="form-actions row spacebetween">
             <button type="submit">Process Rental</button>

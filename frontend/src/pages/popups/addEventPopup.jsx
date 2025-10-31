@@ -60,7 +60,7 @@ function AddEventPopup({ showNotification }) {
               </div>
               <div className="row spacebetween">
                 <label>Location:</label>
-                <input className="etext-input" type="text" name="eventLocation" required
+                <input className="text-input" type="text" name="eventLocation" required
                   value={eventLocation}
                   onChange={(e) => setEventLocation(e.target.value)} />
               </div>

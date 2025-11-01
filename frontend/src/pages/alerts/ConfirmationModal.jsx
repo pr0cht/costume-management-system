@@ -1,6 +1,6 @@
 import React from 'react';
 
-function ConfirmationModal({ message, onConfirm, onCancel }) {
+function ConfirmationModal({ message, onConfirm, onCancel, confirmText = "Confirm" }) {
     return (
         <div className="popup-overlay">
             <div className="popup-content modal-small">
@@ -19,7 +19,7 @@ function ConfirmationModal({ message, onConfirm, onCancel }) {
                         onClick={onConfirm}
                         style={{ backgroundColor: '#E64848', color: 'white' }}
                     >
-                        Delete
+                        {confirmText}
                     </button>
                 </div>
             </div>

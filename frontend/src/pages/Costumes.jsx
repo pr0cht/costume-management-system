@@ -11,7 +11,7 @@ const bufferToURL = (base64String) => {
   return `data:image/png;base64,${base64String}`;
 }
 
-function Costumes({ showNotification }) {
+function Costumes({ showNotification, setPage }) {
   const [filterOpen, setFilterOpen] = useState(false);
   const [costumes, setCostumes] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -79,6 +79,12 @@ function Costumes({ showNotification }) {
           onClick={() => setFilterOpen((open) => !open)}
         >
           Filter
+        </button>
+        <button
+          className="view-history-btn button"
+          onClick={() => setPage('rents')}
+        >
+          View Rent History
         </button>
       </div>
       {filterOpen && (

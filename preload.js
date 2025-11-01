@@ -5,6 +5,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   getCostumes: (filters) => ipcRenderer.invoke('get-costumes', filters),
   editCostume: (data) => ipcRenderer.invoke('edit-costume', data),
   deleteCostume: (id) => ipcRenderer.invoke('delete-costume', id),
+  setCostumeReturned: (data) => ipcRenderer.invoke('set-costume-returned', data),
 
   addClient: (data) => ipcRenderer.invoke('add-client', data),
   getClients: (filters) => ipcRenderer.invoke('getClientsSummary', filters),
@@ -12,7 +13,6 @@ contextBridge.exposeInMainWorld('electronAPI', {
   deleteClient: (id) => ipcRenderer.invoke('delete-client', id),
 
   getRentsHistory: (filters) => ipcRenderer.invoke('get-rents-history', filters),
-  getCostumeReturned: (data) => ipcRenderer.invoke('get-costume-returned', data),
 
   addEvent: (data) => ipcRenderer.invoke('add-event', data),
   getEvents: () => ipcRenderer.invoke('get-events'),

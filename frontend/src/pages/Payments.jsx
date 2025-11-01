@@ -108,6 +108,7 @@ const handleConfirmDelete = async () => {
             setShowConfirmModal(false);
             setPaymentToDelete(null);
           }}
+          confirmText="Delete"
         />
       )}
       </div>

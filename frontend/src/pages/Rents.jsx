@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import ConfirmationModal from './alerts/ConfirmationModal'; // Reusing your modal
+import AppNotification from './alerts/Notification';
 
-function Rents({ showNotification }) {
+function Rents({ showNotification, setPage }) {
   const [filterOpen, setFilterOpen] = useState(false);
   const [rents, setRents] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -29,7 +30,7 @@ function Rents({ showNotification }) {
     if (result.success) {
       setRents(result.data);
     } else {
-      alert(`Failed to fetch rent history: ${result.error}`);
+      showNotification(`Failed to fetch rent history: ${result.error}`);
     }
     setIsLoading(false);
   };
@@ -64,14 +65,14 @@ function Rents({ showNotification }) {
       const result = await window.electronAPI.setCostumeReturned(data);
 
       if (result.success) {
-        alert(`${rentToReturn.costume_Name} marked as returned.`);
+        showNotification(`${rentToReturn.costume_Name} marked as returned.`);
         fetchRents(); // Refresh the list
       } else {
-        alert(`Failed to mark return: ${result.error}`);
+        showNotification(`Failed to mark return: ${result.error}`);
       }
     } catch (error) {
       console.error('Return process failed:', error);
-      alert('An unexpected error occurred.');
+      showNotification('An unexpected error occurred.');
     }
     setRentToReturn(null);
   };
@@ -86,6 +87,12 @@ function Rents({ showNotification }) {
   return (
     <div className="page rents">
       <div className="rents-topbar">
+        <button
+          className="return-btn button"
+          onClick={() => setPage('costumes')}
+        >
+          &larr; Return
+        </button>
         <input
           type="text"
           className="rents-search"
@@ -175,10 +182,10 @@ function Rents({ showNotification }) {
       {/* --- Confirmation Modal --- */}
       {showConfirmModal && rentToReturn && (
         <ConfirmationModal
-          message={`Confirm return of ${rentToReturn.costume_Name}. The costume will be marked available.`}
+          message={`Confirm return of ${rentToReturn.costume_Name}. The costume will be marked as available.`}
           onConfirm={handleConfirmReturn}
           onCancel={() => { setShowConfirmModal(false); setRentToReturn(null); }}
-          showNotification={showNotification}
+          confirmText="Confirm"
         />
       )}
     </div>

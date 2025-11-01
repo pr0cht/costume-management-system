@@ -2,6 +2,7 @@
 import React, { useState} from 'react';
 import Dashboard from './pages/Dashboard';
 import Costumes from './pages/Costumes';
+import Rents from './pages/Rents';
 import Events from './pages/Events';
 import Clients from './pages/Clients';
 import Payments from './pages/Payments';
@@ -23,13 +24,15 @@ function App() {
   };
 
   const renderPage = () => {
-  const pageProps = { showNotification, closeNotification };
+  const pageProps = { showNotification, closeNotification, setPage };
 
   switch (page) {
     case 'dashboard':
       return <Dashboard {...pageProps} />; 
     case 'costumes':
       return <Costumes {...pageProps} />;
+    case 'rents':
+      return <Rents {...pageProps} />;
     case 'events':
       return <Events {...pageProps} />;
     case 'clients':

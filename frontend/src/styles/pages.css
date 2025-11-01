@@ -1,0 +1,95 @@
+/* --- Rents Page Styles --- */
+
+.rents-topbar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: #fff;
+  padding: 16px 24px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(126, 0, 27, 0.08);
+  margin-bottom: 10px;
+}
+
+.rents-search {
+  flex: 1;
+  padding: 8px 12px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  font-size: 1em;
+}
+
+.rents-filter-btn {
+  padding: 8px 16px;
+  background: #E64848;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.rents-filter-btn:hover {
+  background: #b92828;
+}
+
+.rents-filter-popup {
+  background: #fff;
+  border: 1px solid #E64848;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(126, 0, 27, 0.12);
+  padding: 16px 24px;
+  margin-bottom: 16px;
+  animation: fadeInDown 0.3s;
+}
+
+.rents-table {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(126, 0, 27, 0.08);
+  overflow: hidden;
+  margin: 20px 0;
+}
+
+.rents-table table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.rents-table th {
+  background: #E64848;
+  color: white;
+  padding: 12px;
+  text-align: left;
+  font-weight: 600;
+}
+
+.rents-table td {
+  padding: 12px;
+  border-bottom: 1px solid #eee;
+  color: #333;
+}
+
+.rents-table tr:hover {
+  background: #fff5f5;
+}
+
+/* --- Specific Button Styles for Rents Page --- */
+
+.return-btn.button {
+  background-color: #28a745; /* Green for a positive action */
+  padding: 6px 12px;
+  font-size: 0.9em;
+}
+
+.return-btn.button:hover {
+  background-color: #218838;
+}
+
+/* Style for rows that are overdue */
+.rents-table tr.overdue td {
+  background-color: #fff5f5;
+  color: #b32020;
+  font-weight: 500;
+}

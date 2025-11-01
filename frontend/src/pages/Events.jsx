@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import EditEventPopup from './popups/editEventPopup';
 import AddEventPopup from './popups/addEventPopup';
+import AppNotification from './alerts/Notification';
 
-function Events() {
+function Events({ showNotification }) {
   const [filterOpen, setFilterOpen] = useState(false);
   const [events, setEvents] = useState([]);
   const [activeEvents, setActiveEvents] = useState([]);
@@ -42,7 +43,7 @@ function Events() {
   return (
     <div className="page events">
       <div className="events-topbar">
-        <AddEventPopup />
+        <AddEventPopup showNotification={showNotification} onEventAdded={fetchActiveEvents} />
         <input
           type="text"
           className="events-search"
@@ -113,6 +114,7 @@ function Events() {
             fetchPastEvents();
           }
           }
+          showNotification={showNotification}
         />
       </div>
     </div>

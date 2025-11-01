@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import AppNotification from "../alerts/Notification";
 
-function AddChargePopup({ client, onClose, onChargeAdded }) {
+function AddChargePopup({ client, onClose, onChargeAdded, showNotification }) {
     const [clientTransactions, setClientTransactions] = useState([]);
     const [isLoadingTransactions, setIsLoadingTransactions] = useState(true);
 
@@ -20,7 +20,7 @@ function AddChargePopup({ client, onClose, onChargeAdded }) {
                 if (result.success) {
                     setClientTransactions(result.data);
                 } else {
-                    console.error("Failed to fetch client transactions:", result.error);
+                    showNotification("Failed to fetch client transactions:", result.error);
                 }
                 setIsLoadingTransactions(false);
             };

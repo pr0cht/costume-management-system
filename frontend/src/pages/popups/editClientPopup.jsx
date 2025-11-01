@@ -1,7 +1,7 @@
 import React, { use, useEffect, useState } from "react";
 import AppNotification from "../alerts/Notification";
 
-function EditClientPopup({ client, onClose, onClientUpdated }) {
+function EditClientPopup({ client, onClose, onClientUpdated, showNotification }) {
   const [name, setName] = useState("");
   const [address, setAddress] = useState("");
   const [age, setAge] = useState("");

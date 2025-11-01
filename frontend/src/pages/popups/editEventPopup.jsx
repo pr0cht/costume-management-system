@@ -1,7 +1,7 @@
 import React, { use, useEffect, useState } from "react";
 import AppNotification from "../alerts/Notification";
 
-function EditEventPopup({ event, onClose, onEventUpdated }) {
+function EditEventPopup({ event, onClose, onEventUpdated, showNotification }) {
   const [name, setName] = useState("");
   const [date, setDate] = useState("");
   const [location, setLocation] = useState("");

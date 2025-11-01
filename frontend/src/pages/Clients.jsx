@@ -128,12 +128,14 @@ function Clients({ showNotification }) { // Accept showNotification prop
         client={editingClient}
         onClose={() => setEditingClient(null)}
         onClientUpdated={fetchClients}
+        showNotification={showNotification}
       />
       {chargingClient && (
         <AddChargePopup
             client={chargingClient}
             onClose={() => setChargingClient(null)}
-            onChargeAdded={fetchClients} 
+            onChargeAdded={fetchClients}
+            showNotification={showNotification}
         />
       )}
     </div>

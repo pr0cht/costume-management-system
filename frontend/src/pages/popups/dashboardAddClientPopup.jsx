@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import AddClientPopup from './addClientPopup'; 
+import AppNotification from '../alerts/Notification';
 
-function DashboardAddClient() {
+function DashboardAddClient({ showNotification }) {
   const [showPopup, setShowPopup] = useState(false);
 
   return (
@@ -13,6 +14,7 @@ function DashboardAddClient() {
             <AddClientPopup 
                 onClientRegistered={null} 
                 onCancel={() => setShowPopup(false)} 
+                showNotification={showNotification}
             />
           </div>
         </div>

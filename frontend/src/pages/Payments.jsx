@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import EditPaymentPopup from './popups/editPaymentPopup';
 import ConfirmationModal from './alerts/ConfirmationModal';
 import AddNewPayment from './popups/addNewPayment';
+import AppNotification from './alerts/Notification';
 
-function Payments() {
+function Payments({ showNotification }) {
   const [filterOpen, setFilterOpen] = useState(false);
   const [payments, setPayments] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -84,6 +85,7 @@ const handleConfirmDelete = async () => {
       <div className="payments-topbar">
         <AddNewPayment 
           onPaymentAdded={fetchPayments}
+          showNotification={showNotification}
         />
         <input
           type="text"
@@ -185,6 +187,7 @@ const handleConfirmDelete = async () => {
         payment={editingPayment}
         onClose={() => setEditingPayment(null)}
         onPaymentUpdated={fetchPayments}
+        showNotification={showNotification}
     />
     </div>
   );

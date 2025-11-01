@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import AppNotification from "../alerts/Notification";
 
-function EditPaymentPopup({ payment, onClose, onPaymentUpdated }) {
+function EditPaymentPopup({ payment, onClose, onPaymentUpdated, showNotification }) {
     const [paymentAmount, setPaymentAmount] = useState('');
     const [paymentDate, setPaymentDate] = useState('');
     const [paymentRemarks, setPaymentRemarks] = useState('');

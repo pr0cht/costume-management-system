@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import ConfirmationModal from './alerts/ConfirmationModal'; // Reusing your modal
 
-function Rents() {
+function Rents({ showNotification }) {
   const [filterOpen, setFilterOpen] = useState(false);
   const [rents, setRents] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -178,6 +178,7 @@ function Rents() {
           message={`Confirm return of ${rentToReturn.costume_Name}. The costume will be marked available.`}
           onConfirm={handleConfirmReturn}
           onCancel={() => { setShowConfirmModal(false); setRentToReturn(null); }}
+          showNotification={showNotification}
         />
       )}
     </div>

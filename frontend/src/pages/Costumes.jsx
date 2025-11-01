@@ -55,7 +55,7 @@ function Costumes({ showNotification, setPage }) {
 
     const handler = setTimeout(() => {
       fetchCostumes();
-    }, 1000)
+    }, 500)
 
     return () => {
       clearTimeout(handler);
@@ -154,28 +154,42 @@ function Costumes({ showNotification, setPage }) {
         </div>
       )}
       <div className="costumes-grid">
-        {isLoading ? (
-          <p>Loading costumes...</p>
-        ) : (
-          costumes.map((costume) => (
-            <div className="costume-item" key={costume.costume_ID}>
-              <div className="costume-thumbnail small">
-                <img src={bufferToURL(costume.costume_Image)} alt={costume.costume_Name} />
-              </div>
-              <p><span className="costume-name">{costume.costume_Name}</span></p>
-              <p>Origin: <span className="costume-origin">{costume.costume_Origin}</span></p>
-              <p>Type: <span className="costume-type">{costume.costume_Type}</span></p>
-              <p>Size: <span className="costume-size">{costume.costume_Size}</span></p>
-              <p>Gender: <span className="costume-gender">{costume.costume_Gender}</span></p>
-              <p>Price: <span className="costume-price">{costume.costume_Price.toFixed(2)}</span></p>
-              <p>Status: <span className="costume-status">{costume.costume_Available ? 'Available' : 'Rented'}</span></p>
-              <div className='costume-actions'>
-                <button className="edit-btn button" onClick={() => setEditingCostume(costume)}>Edit</button>
-                <button className="rent-btn button" onClick={() => setRentingCostume(costume)}>Rent</button>
-              </div>
-            </div>
-          ))
-        )}
+        {costumes.map((costume) => {
+              const isRented = !costume.costume_Available;
+              
+              return (
+            <div 
+                className={`costume-item ${isRented ? 'is-rented' : ''}`} 
+                key={costume.costume_ID}
+              >
+              <div className="costume-thumbnail small">
+                <img src={bufferToURL(costume.costume_Image)} alt={costume.costume_Name} />
+              </div>
+              <p><span className="costume-name">{costume.costume_Name}</span></p>
+              <p>Origin: <span className="costume-origin">{costume.costume_Origin}</span></p>
+              <p>Type: <span className="costume-type">{costume.costume_Type}</span></p>
+              <p>Size: <span className="costume-size">{costume.costume_Size}</span></p>
+              <p>Gender: <span className="costume-gender">{costume.costume_Gender}</span></p>
+              <p>Price: <span className="costume-price">{costume.costume_Price.toFixed(2)}</span></p>
+              <p>Status: <span className="costume-status">{costume.costume_Available ? 'Available' : 'Rented'}</span></p>
+              <div className='costume-actions'>
+                <button 
+                  className="edit-btn button" 
+                  onClick={isRented ? null : () => setEditingCostume(costume)}
+                  disabled={isRented}
+                >
+                    Edit
+                </button>
+                <button className="rent-btn button" 
+                  onClick={isRented ? null : () => setRentingCostume(costume)}
+                  disabled={isRented}
+                >
+                    Rent
+                </button>
+              </div>
+            </div>
+          );
+        })}
       </div>
       <EditCostumePopup
         costume={editingCostume}

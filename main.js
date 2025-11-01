@@ -818,7 +818,8 @@ ipcMain.handle('get-general-stats', (event) => {
     const rentedCostumesStmt = db.prepare('SELECT COUNT(costume_ID) AS rented FROM Costume WHERE costume_Available = 0');
     const totalBalanceStmt = db.prepare('SELECT COALESCE(SUM(balance), 0) AS total_due FROM Transactions WHERE balance > 0');
     const totalClientsStmt = db.prepare('SELECT COUNT(client_ID) AS total_clients FROM Client');
-    
+    const totalRevenueStmt = db.prepare('SELECT COALESCE(SUM(payment_Amount), 0) AS total_revenue FROM Payment');
+
     return { 
       success: true, 
       data: {
@@ -826,6 +827,7 @@ ipcMain.handle('get-general-stats', (event) => {
         available: availableCostumesStmt.get().available,
         rented: rentedCostumesStmt.get().rented,
         totalBalanceDue: totalBalanceStmt.get().total_due,
+        totalRevenue: totalRevenueStmt.get().total_revenue,
         totalClients: totalClientsStmt.get().total_clients
       }
     };

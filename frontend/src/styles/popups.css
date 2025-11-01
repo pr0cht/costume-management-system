@@ -193,6 +193,10 @@ form {
     background-color: #f0f0f0;
 }
 
+.client-financial-status p {
+    margin: 0;
+}
+
 /* Selected Costume Display */
 
 .selected-costume-display {

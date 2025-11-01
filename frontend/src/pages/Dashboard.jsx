@@ -11,51 +11,74 @@ const barOptions = { /* ... */ };
 const doughnutOptions = { /* ... */ };
 
 function Dashboard({ showNotification }) {
-  const [stats, setStats] = useState({ total: 0, available: 0, rented: 0, totalBalanceDue: 0 });
-  const [lists, setLists] = useState({ returnsDueCount: 0, upcomingEventsList: [], recentRentals: [], recentClients: [] });
+  const [stats, setStats] = useState({ total: 0, available: 0, rented: 0, totalBalanceDue: 0, totalRevenue: 0, });
+  const [lists, setLists] = useState({ returnsDueCount: 0, upcomingEventsList: [], recentRentals: [], recentClients: [], totalClients: 0 });
   const [isLoading, setIsLoading] = useState(true);
+
+  const [dismissedAlerts, setDismissedAlerts] = useState({
+    returns: false,
+    events: false,
+    balance: false,
+  });
+
+  const handleDismissAlert = (alertType) => {
+    setDismissedAlerts(prev => ({ ...prev, [alertType]: true }));
+  };
 
   const fetchDashboardData = useCallback(async () => {
     setIsLoading(true);
-    let newStats = {};
-    let newLists = {};
+    let finalStats = {};
+    let finalLists = {};
 
     try {
-      const statsResult = await window.electronAPI.getGeneralStats();
+      const [statsResult, clientsResult, listsResult] = await Promise.all([
+        window.electronAPI.getGeneralStats(),
+        window.electronAPI.getRecentClients(),
+        window.electronAPI.getDashboardLists(),
+      ]);
+
       if (statsResult.success) {
-        newStats = statsResult.data;
+        finalStats = statsResult.data;
       }
 
-      const clientsResult = await window.electronAPI.getRecentClients();
       if (clientsResult.success) {
-        newLists.recentClients = clientsResult.data;
+        finalLists.recentClients = clientsResult.data;
+      } else {
+        finalLists.recentClients = [];
       }
 
-      const listsResult = await window.electronAPI.getDashboardLists();
       if (listsResult.success) {
-        newLists = { ...newLists, ...listsResult.data };
+        finalLists = { ...finalLists, ...listsResult.data };
       }
 
-      setStats(prevStats => ({
-        ...prevStats,
-        ...newStats
-      }));
-      setLists(prevLists => ({
-        ...prevLists,
-        ...newLists
-      }));
+      if (finalLists.returnsDueCount > 0) {
+        showNotification(`ATTENTION: ${finalLists.returnsDueCount} costumes are due today!`, 'error');
+      }
+      if (finalLists.upcomingEventsList.length > 0) {
+        showNotification(`${finalLists.upcomingEventsList.length} events scheduled soon.`, 'error');
+      }
+      if (finalStats.totalBalanceDue > 0) {
+        const currency = formatCurrency(finalStats.totalBalanceDue);
+        showNotification(`Outstanding balance: ${currency}`, 'error');
+      }
 
+      setStats(finalStats);
+      setLists(finalLists);
 
     } catch (error) {
       console.error("Failed to load dashboard data:", error);
-      showNotification("Failed to load dashboard data.", 'error');
+      if (showNotification) {
+        showNotification("Failed to load dashboard data.", 'error');
+      }
     } finally {
       setIsLoading(false);
     }
-  }, [showNotification]);
+  }, [])
 
   useEffect(() => {
-    fetchDashboardData();
+    if (typeof window.electronAPI !== 'undefined') {
+      fetchDashboardData();
+    }
   }, [fetchDashboardData]);
 
   const doughnutData = {
@@ -84,33 +107,6 @@ function Dashboard({ showNotification }) {
 
   return (
     <div className="page dashboard">
-
-      {/* --- ALERTS --- */}
-      <div className="dashboard-alerts">
-        {lists.returnsDueCount > 0 && (
-          <div className="alert">
-            <span className="alert-icon">⚠️</span>
-            <span>**{lists.returnsDueCount}** costumes due for return today/overdue</span>
-            <img className="close-alert" src="assets/close.png" />
-          </div>
-        )}
-        {lists.upcomingEventsList.length > 0 && (
-          <div className="alert" style={{ borderLeftColor: 'darkorange', color: 'darkorange' }}>
-            <span className="alert-icon">📅</span>
-            <span>{lists.upcomingEventsList.length} events scheduled soon (e.g., {lists.upcomingEventsList[0].event_Name} on {lists.upcomingEventsList[0].event_Date})</span>
-            <img className="close-alert" src="assets/close.png" />
-          </div>
-        )}
-        {/* Show balance alert only if a non-zero balance is due */}
-        {stats.totalBalanceDue > 0 && (
-          <div className="alert" style={{ borderLeftColor: 'red', color: 'red' }}>
-            <span className="alert-icon">💸</span>
-            <span>Outstanding Payments Total: {formatCurrency(stats.totalBalanceDue)}</span>
-            <img className="close-alert" src="assets/close.png" />
-          </div>
-        )}
-      </div>
-
       <div className="dashboard-quick-actions">
         <AddCostumePopup showNotification={showNotification} onCostumeAdded={fetchDashboardData} />
         <DashboardAddClient showNotification={showNotification} onClientRegistered={fetchDashboardData} />
@@ -153,10 +149,10 @@ function Dashboard({ showNotification }) {
             </div>
 
             {/* --- CARD 4: PAYMENT STATUS (Static Sample) --- */}
-            <div className="dashboard-card">
-              <h2>Total Revenue (Sample)</h2>
-              <p>{formatCurrency(12400)}</p>
-              <small className="trend-up">↑ Paid this week</small>
+            <div className="dashboard-card" style={{ borderLeft: '4px solid #28a745' }}>
+              <h2>Total Revenue</h2>
+              <p>{formatCurrency(stats.totalRevenue)}</p>
+              <small className="trend-up">Lifetime Earnings</small>
             </div>
           </div>
 

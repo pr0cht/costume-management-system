@@ -552,7 +552,12 @@ button:focus-visible, .button:focus,
 
 /* Alerts Section */
 .dashboard-alerts {
-    margin: 15x 0;
+    position: fixed;
+    top: 20px; /* Adjust as needed */
+    right: 20px;
+    width: auto;
+    max-width: 400px;
+    z-index: 500; /* Higher than normal content */
     display: flex;
     flex-direction: column;
     gap: 10px;
@@ -614,6 +619,20 @@ button:focus-visible, .button:focus,
   padding: 5px;
 }
 
+.costume-item.is-rented {
+  background-color: #ffdfdf;
+  border: 1px solid #eb7272; 
+}
+
+.costume-item.is-rented:hover {
+  transform: scale(1.01); 
+}
+
+.costume-item.is-rented .rent-btn {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .costume-item:hover {
   transform: translateY(-4px);
   transform: scale(1.02);
@@ -649,6 +668,13 @@ button:focus-visible, .button:focus,
   justify-content: left;
   gap: 5px;
   margin-top: 10px;
+}
+
+.costume-actions button[disabled] {
+    opacity: 0.6;
+    cursor: not-allowed;
+    background-color: #7E001B !important;
+    color: #ccc !important;
 }
 
 /* Events Sections */

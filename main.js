@@ -1,13 +1,119 @@
-const { app, BrowserWindow, Tray, Menu } = require('electron');
+if (process.argv.length === 1) {
+  try {
+    if (require('electron-squirrel-startup')) return;
+  } catch (e) {
+
+  }
+}
+
+if (require('electron-squirrel-startup')) {
+  return;
+}
+
+const { app, BrowserWindow, Tray, Menu, dialog, ipcMain } = require('electron');
+const fs = require('fs');
+const fsPromises = require('fs/promises');
 const path = require("path");
 const Database = require('better-sqlite3');
 
-const dbPath = path.join(__dirname, 'db', 'cms.db');
-const db = new Database(dbPath);
-db.pragma(`busy_timeout = 5000`)
+let db;
 
 app.disableHardwareAcceleration();
+
+const DATABASE_SCHEMA = `
+CREATE TABLE IF NOT EXISTS Costume (
+    costume_ID INTEGER PRIMARY KEY AUTOINCREMENT,
+    costume_Name TEXT NOT NULL,
+    costume_Origin TEXT,
+    costume_Type TEXT,
+    costume_Size TEXT,
+    costume_Gender TEXT,
+    costume_Price REAL NOT NULL,
+    costume_Inclusion TEXT,
+    costume_Available TEXT NOT NULL DEFAULT 'Available',
+    costume_Image BLOB
+);
+
+CREATE TABLE IF NOT EXISTS Client (
+    client_ID INTEGER PRIMARY KEY AUTOINCREMENT,
+    client_Name TEXT NOT NULL,
+    client_Address TEXT,
+    client_Age INTEGER,
+    client_Cellphone TEXT NOT NULL,
+    client_Socials TEXT,
+    client_Occupation TEXT
+);
+
+CREATE TABLE IF NOT EXISTS Event (
+    event_ID INTEGER PRIMARY KEY AUTOINCREMENT,
+    event_Name TEXT NOT NULL,
+    event_Date TEXT NOT NULL,
+    event_Location TEXT
+);
+
+CREATE TABLE IF NOT EXISTS Transactions (
+    transaction_ID INTEGER PRIMARY KEY AUTOINCREMENT,
+    client_ID INTEGER,
+    transaction_Date TEXT NOT NULL,
+    balance REAL NOT NULL DEFAULT 0.00,
+    FOREIGN KEY (client_ID) REFERENCES Client(client_ID)
+);
+
+CREATE TABLE IF NOT EXISTS Rents (
+    rent_ID INTEGER PRIMARY KEY AUTOINCREMENT,
+    transaction_ID INTEGER,
+    costume_ID INTEGER,
+    costume_Fee REAL NOT NULL,
+    event_ID INTEGER,
+    rentDate TEXT NOT NULL,
+    returnDate TEXT NOT NULL,
+    costume_Returned INTEGER NOT NULL DEFAULT 0,
+    FOREIGN KEY (transaction_ID) REFERENCES Transactions(transaction_ID),
+    FOREIGN KEY (costume_ID) REFERENCES Costume(costume_ID),
+    FOREIGN KEY (event_ID) REFERENCES Event(event_ID)
+);
+
+CREATE TABLE IF NOT EXISTS Payment (
+    payment_ID INTEGER PRIMARY KEY AUTOINCREMENT,
+    transaction_ID INTEGER,
+    payment_Date TEXT NOT NULL,
+    payment_Amount REAL NOT NULL,
+    payment_Remarks TEXT,
+    FOREIGN KEY (transaction_ID) REFERENCES Transactions(transaction_ID)
+);
+
+CREATE TABLE IF NOT EXISTS Charges (
+    charge_ID INTEGER PRIMARY KEY AUTOINCREMENT,
+    transaction_ID INTEGER,
+    charge_Date TEXT NOT NULL,
+    charge_Description TEXT,
+    charge_Amount REAL NOT NULL,
+    FOREIGN KEY (transaction_ID) REFERENCES Transactions(transaction_ID)
+);
+
+PRAGMA foreign_keys = ON;
+`;
+
+// Function to run the schema
+function initializeDatabase(database) {
+  console.log("Initializing database schema...");
+  database.exec(DATABASE_SCHEMA);
+  console.log("Database schema initialized successfully.");
+}
+
 app.whenReady().then(() => {
+  const userDataPath = app.getPath('userData');
+  const dbDir = path.join(userDataPath, 'db');
+  const dbPath = path.join(dbDir, 'cms.db');
+
+  if (!fs.existsSync(dbDir)) {
+    fs.mkdirSync(dbDir, { recursive: true });
+  }
+
+  db = new Database(dbPath);
+
+  initializeDatabase(db);
+
   const mainWindow = new BrowserWindow({
     width: 1080,
     height: 720,
@@ -35,24 +141,24 @@ app.whenReady().then(() => {
   mainWindow.on('closed', () => {
     app.quit();
   });
-    const tray = new Tray('frontend/dist/assets/tray_icon.jpg');
-    const contextMenu = require('electron').Menu.buildFromTemplate([
+  const tray = new Tray('frontend/dist/assets/tray_icon.jpg');
+  const contextMenu = require('electron').Menu.buildFromTemplate([
     {
-        label: 'Show App',
-        click: () => {
+      label: 'Show App',
+      click: () => {
         mainWindow.show();
-        }
+      }
     },
     {
-        label: 'Quit',
-        click: () => {
+      label: 'Quit',
+      click: () => {
         app.quit();
-        }
+      }
     }
-    ]);
+  ]);
 
-    tray.setToolTip('Costume Management System');
-    tray.setContextMenu(contextMenu);
+  tray.setToolTip('Costume Management System');
+  tray.setContextMenu(contextMenu);
 });
 
 app.on('will-quit', () => {
@@ -63,11 +169,9 @@ app.on('will-quit', () => {
 
 // costume functions
 
-const { ipcMain } = require('electron');
-
 ipcMain.handle('add-costume', async (event, costumeData) => {
   const { name, origin, type, gender, size, price, inclusions, available, img } = costumeData;
-
+  const status = available ? 'Available' : 'Unavailable';
   try {
     const imageBuffer = img ? Buffer.from(img) : null;
 
@@ -77,7 +181,7 @@ ipcMain.handle('add-costume', async (event, costumeData) => {
       costume_Available, costume_Image)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
-    
+
     const stmt = db.prepare(sql);
 
     const result = stmt.run(
@@ -88,7 +192,7 @@ ipcMain.handle('add-costume', async (event, costumeData) => {
       gender,
       price,
       inclusions,
-      available ? 1 : 0,
+      status,
       imageBuffer
     );
     return { success: true, lastID: result.lastInsertRowid };
@@ -112,7 +216,7 @@ ipcMain.handle('get-costumes', (event, filters) => {
     }
     if (filters?.available) {
       whereClauses.push('costume_Available = ?');
-      params.push(1);
+      params.push('Available');
     }
     if (filters?.size) {
       whereClauses.push('costume_Size = ?');
@@ -140,7 +244,7 @@ ipcMain.handle('get-costumes', (event, filters) => {
     const sortOrder = ['ASC', 'DESC'].includes(filters?.sortOrder?.toUpperCase()) ? filters.sortOrder.toUpperCase() : 'ASC';
 
     baseQuery += ` ORDER BY ${sortColumn} ${sortOrder}`;
-    
+
     console.log('Executing SQL:', baseQuery, params);
 
     const stmt = db.prepare(baseQuery);
@@ -152,7 +256,7 @@ ipcMain.handle('get-costumes', (event, filters) => {
       }
       return costume;
     });
-    
+
     return { success: true, data: costumesWithImages };
 
   } catch (err) {
@@ -174,7 +278,7 @@ ipcMain.handle('edit-costume', async (event, costumeData) => {
       gender,
       price,
       inclusions,
-      available ? 1 : 0,
+      available,
     ];
 
     if (img) {
@@ -198,7 +302,7 @@ ipcMain.handle('edit-costume', async (event, costumeData) => {
       `;
       params.push(id)
     }
-    
+
     const stmt = db.prepare(sql);
 
     const result = stmt.run(...params);
@@ -232,7 +336,7 @@ ipcMain.handle('add-client', async (event, clientData) => {
       client_Socials, client_Occupation)
       VALUES (?, ?, ?, ?, ?, ?)
     `;
-    
+
     const stmt = db.prepare(sql);
 
     const result = stmt.run(
@@ -262,7 +366,7 @@ ipcMain.handle('getClientsSummary', (event, filters) => {
       LEFT JOIN Transactions T ON C.client_ID = T.client_ID
       LEFT JOIN Rents R ON T.transaction_ID = R.transaction_ID
     `;
-    
+
     const whereClauses = [];
     const params = [];
 
@@ -270,7 +374,7 @@ ipcMain.handle('getClientsSummary', (event, filters) => {
       whereClauses.push('C.client_Name LIKE ?');
       params.push(`%${filters.searchTerm}%`);
     }
-    
+
     const havingClauses = [];
     if (filters?.hasBalance) {
       havingClauses.push('total_balance_due > 0');
@@ -279,18 +383,18 @@ ipcMain.handle('getClientsSummary', (event, filters) => {
     if (whereClauses.length > 0) {
       baseQuery += ` WHERE ${whereClauses.join(' AND ')}`;
     }
-    
+
     baseQuery += ` GROUP BY C.client_ID `;
 
     if (havingClauses.length > 0) {
       baseQuery += ` HAVING ${havingClauses.join(' AND ')}`;
     }
 
-    baseQuery += ` ORDER BY C.client_Name ASC `; 
-    
+    baseQuery += ` ORDER BY C.client_Name ASC `;
+
     const stmt = db.prepare(baseQuery);
     const clients = stmt.all(...params);
-    
+
     return { success: true, data: clients };
 
   } catch (err) {
@@ -337,7 +441,7 @@ ipcMain.handle('add-event', async (event, eventData) => {
       INSERT INTO Event (event_Name, event_Date, event_Location)
       VALUES (?, ?, ?)
     `;
-    
+
     const stmt = db.prepare(sql);
 
     const result = stmt.run(
@@ -420,7 +524,7 @@ ipcMain.handle('add-payment', (event, paymentData) => {
   if (isNaN(paymentAmount) || paymentAmount <= 0) {
     return { success: false, error: "Payment amount must be a positive number." };
   }
-  
+
   const transaction = db.transaction(() => {
     const paymentStmt = db.prepare('INSERT INTO Payment (transaction_ID, payment_Date, payment_Amount, payment_Remarks) VALUES (?, ?, ?, ?)');
     const paymentInfo = paymentStmt.run(transactionId, paymentDate, paymentAmount, paymentRemarks || 'Payment');
@@ -461,7 +565,7 @@ ipcMain.handle('get-payments', (event, filters) => {
       JOIN Transactions T ON P.transaction_ID = T.transaction_ID
       JOIN Client C ON T.client_ID = C.client_ID
     `;
-    
+
     const whereClauses = [];
     const params = [];
 
@@ -482,14 +586,14 @@ ipcMain.handle('get-payments', (event, filters) => {
       amount: 'P.payment_Amount',
       balance: 'T.balance'
     }[filters?.sort] || 'P.payment_Date';
-    
+
     const sortOrder = ['ASC', 'DESC'].includes(filters?.sortOrder?.toUpperCase()) ? filters.sortOrder.toUpperCase() : 'DESC'; // Default to DESC (most recent first)
 
     baseQuery += ` ORDER BY ${sortColumn} ${sortOrder}`;
 
     const stmt = db.prepare(baseQuery);
     const payments = stmt.all(...params);
-    
+
     return { success: true, data: payments };
 
   } catch (err) {
@@ -590,7 +694,7 @@ ipcMain.handle('get-recent-transactions', (event) => {
       /* Order by Transaction Date Descending (most recent first) */
       ORDER BY T.transaction_Date DESC
     `;
-    
+
     const stmt = db.prepare(sql);
     const transactions = stmt.all();
 
@@ -617,7 +721,7 @@ ipcMain.handle('get-rents-history', (event, filters) => {
       JOIN Transactions T ON R.transaction_ID = T.transaction_ID
       JOIN Client CL ON T.client_ID = CL.client_ID
     `;
-    
+
     const whereClauses = [];
     const params = [];
 
@@ -639,7 +743,7 @@ ipcMain.handle('get-rents-history', (event, filters) => {
 
     const stmt = db.prepare(baseQuery);
     const rents = stmt.all(...params);
-    
+
     return { success: true, data: rents };
 
   } catch (err) {
@@ -662,7 +766,7 @@ ipcMain.handle('set-costume-returned', (event, rentData) => {
 
     const updateCostumeStmt = db.prepare(`
       UPDATE Costume
-      SET costume_Available = 1
+      SET costume_Available = 'Available'
       WHERE costume_ID = ?
     `);
     updateCostumeStmt.run(costumeId);
@@ -689,12 +793,16 @@ ipcMain.handle('get-available-costumes', (event) => {
     const costumesWithImages = costumes.map(costume => {
       if (costume.costume_Image) {
         return {
-          ...costume, costume_Image: costume.costume_Image.toString('base64') }
+          ...costume, costume_Image: costume.costume_Image.toString('base64')
         }
-      return costume });
+      }
+      return costume
+    });
 
-    return { success: true, data: costumesWithImages
-  }} catch (error) {
+    return {
+      success: true, data: costumesWithImages
+    }
+  } catch (error) {
     console.error("Database Error in main.js:", error.message);
     return { success: false, error: error.message };
   }
@@ -711,7 +819,7 @@ ipcMain.handle('process-rental', (event, rentalData) => {
       if (!costumeInfo) {
         throw new Error(`Costume with ID ${costumeId} not found.`);
       }
-      totalCostumeFee += costumeInfo.costume_Price; 
+      totalCostumeFee += costumeInfo.costume_Price;
     }
 
     const initialBalance = totalCostumeFee - paymentAmount;
@@ -720,17 +828,17 @@ ipcMain.handle('process-rental', (event, rentalData) => {
     const transactionId = info.lastInsertRowid;
 
     const paymentStmt = db.prepare('INSERT INTO Payment (transaction_ID, payment_Date, payment_Amount, payment_Remarks) VALUES (?, ?, ?, ?)');
-    if (paymentAmount > 0) { 
-        paymentStmt.run(transactionId, rentalDate, paymentAmount, paymentRemarks || 'Initial Rental Payment');
+    if (paymentAmount > 0) {
+      paymentStmt.run(transactionId, rentalDate, paymentAmount, paymentRemarks || 'Initial Rental Payment');
     }
     const rentStmt = db.prepare(`
       INSERT INTO Rents (transaction_ID, costume_ID, costume_Fee, event_ID, rentDate, returnDate, costume_returned)
       VALUES (?, ?, ?, ?, ?, ?, 0)
     `);
-    const updateCostumeStmt = db.prepare('UPDATE Costume SET costume_Available = 0 WHERE costume_ID = ?');
+    const updateCostumeStmt = db.prepare(`UPDATE Costume SET costume_Available = 'Rented' WHERE costume_ID = ?`);
 
     for (const costumeId of costumeIds) {
-      const costumeInfo = getCostumeFeeStmt.get(costumeId); 
+      const costumeInfo = getCostumeFeeStmt.get(costumeId);
       const costumeFee = costumeInfo.costume_Price;
       rentStmt.run(transactionId, costumeId, costumeFee, eventId, rentalDate, returnDate);
       updateCostumeStmt.run(costumeId);
@@ -760,10 +868,10 @@ ipcMain.handle('get-transactions-by-client', (event, clientId) => {
       WHERE T.client_ID = ? /* <-- FILTER by the client ID */
       ORDER BY T.transaction_Date DESC
     `;
-    
+
     const stmt = db.prepare(sql);
     // Use the clientId parameter to safely filter the transactions
-    const transactions = stmt.all(clientId); 
+    const transactions = stmt.all(clientId);
 
     return { success: true, data: transactions };
   } catch (err) {
@@ -814,17 +922,19 @@ ipcMain.handle('add-charge', (event, chargeData) => {
 ipcMain.handle('get-general-stats', (event) => {
   try {
     const totalCostumesStmt = db.prepare('SELECT COUNT(costume_ID) AS total FROM Costume');
-    const availableCostumesStmt = db.prepare('SELECT COUNT(costume_ID) AS available FROM Costume WHERE costume_Available = 1');
-    const rentedCostumesStmt = db.prepare('SELECT COUNT(costume_ID) AS rented FROM Costume WHERE costume_Available = 0');
+    const availableCostumesStmt = db.prepare(`SELECT COUNT(costume_ID) AS available FROM Costume WHERE costume_Available = 'Available'`);
+    const unavailableCostumesStmt = db.prepare(`SELECT COUNT(costume_ID) AS unavailable FROM Costume WHERE costume_Available = 'Unavailable'`);
+    const rentedCostumesStmt = db.prepare(`SELECT COUNT(costume_ID) AS rented FROM Costume WHERE costume_Available = 'Rented'`);
     const totalBalanceStmt = db.prepare('SELECT COALESCE(SUM(balance), 0) AS total_due FROM Transactions WHERE balance > 0');
     const totalClientsStmt = db.prepare('SELECT COUNT(client_ID) AS total_clients FROM Client');
     const totalRevenueStmt = db.prepare('SELECT COALESCE(SUM(payment_Amount), 0) AS total_revenue FROM Payment');
 
-    return { 
-      success: true, 
+    return {
+      success: true,
       data: {
         total: totalCostumesStmt.get().total,
         available: availableCostumesStmt.get().available,
+        unavailable: unavailableCostumesStmt.get().unavailable,
         rented: rentedCostumesStmt.get().rented,
         totalBalanceDue: totalBalanceStmt.get().total_due,
         totalRevenue: totalRevenueStmt.get().total_revenue,
@@ -841,21 +951,21 @@ ipcMain.handle('get-dashboard-lists', (event) => {
   try {
     const today = new Date().toISOString().split('T')[0];
     const twoDaysFromNow = new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-    
+
     // 1. Unreturned/Overdue Alert (Assuming due date is returnDate)
     const returnsDueStmt = db.prepare(`
       SELECT COUNT(rent_ID) AS count 
       FROM Rents
       WHERE costume_Returned = 0 AND returnDate <= date('now')
     `);
-    
+
     // 2. Upcoming Events Alert (Events scheduled for today or tomorrow)
     const upcomingEventsStmt = db.prepare(`
       SELECT event_Name, event_Date FROM Event
       WHERE event_Date >= date('now')
       ORDER BY event_Date ASC LIMIT 5
     `);
-    
+
     // 3. Recently Rented Costumes (JOIN Rents, Costume, Client)
     const recentRentalsStmt = db.prepare(`
       SELECT 
@@ -866,7 +976,7 @@ ipcMain.handle('get-dashboard-lists', (event) => {
       JOIN Client CL ON T.client_ID = CL.client_ID
       ORDER BY R.rentDate DESC LIMIT 5
     `);
-    
+
     // 4. Recently Added Clients
     const recentClientsStmt = db.prepare(`
       SELECT client_Name 
@@ -897,9 +1007,9 @@ ipcMain.handle('get-recent-clients', (event) => {
       ORDER BY client_ID DESC 
       LIMIT 5
     `);
-    
-    return { 
-      success: true, 
+
+    return {
+      success: true,
       data: recentClientsStmt.all()
     };
   } catch (err) {
@@ -907,3 +1017,208 @@ ipcMain.handle('get-recent-clients', (event) => {
     return { success: false, error: err.message };
   }
 });
+
+// database management handlers
+
+// TRUNCATE
+ipcMain.handle('delete-all-data', (event) => {
+  const tablesToTruncate = [
+    'Payment',
+    'Charges',
+
+    'Rents',
+    'MTO',
+    'Transactions',
+
+    'Costume',
+    'Client',
+    'Event'
+  ];
+
+  const transaction = db.transaction(() => {
+    db.prepare('PRAGMA foreign_keys = OFF;').run();
+
+    for (const table of tablesToTruncate) {
+      db.prepare(`DELETE FROM ${table}`).run();
+    }
+
+    db.prepare('DELETE FROM sqlite_sequence').run();
+
+    db.prepare('PRAGMA foreign_keys = ON;').run();
+  });
+
+  try {
+    transaction();
+    return { success: true };
+  } catch (error) {
+    console.error("Database Error during Truncation:", error.message);
+    return { success: false, error: error.message };
+  }
+});
+
+// EXPORT 
+ipcMain.handle('export-db', async (event) => {
+  const originalDbPath = path.join(__dirname, 'db', 'cms.db');
+  const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+
+  const result = await dialog.showSaveDialog({
+    title: 'Save Database Backup',
+    defaultPath: `costume_cms_backup_${timestamp}.db`,
+    filters: [{ name: 'SQLite Database', extensions: ['db'] }]
+  });
+
+  if (result.canceled || !result.filePath) {
+    return { success: false, message: 'Export canceled.' };
+  }
+
+  try {
+    await fsPromises.copyFile(originalDbPath, result.filePath);
+    return { success: true, message: `Backup saved to: ${result.filePath}` };
+  } catch (error) {
+    console.error("Export failed:", error);
+    return { success: false, error: error.message };
+  }
+});
+
+function jsonToCsv(items) {
+  if (items.length === 0) {
+    return "";
+  }
+  const header = Object.keys(items[0]);
+  const csvRows = [header.join(',')]; // Add header row
+  for (const item of items) {
+    const values = header.map(key => {
+      let value = item[key];
+      if (typeof value === 'string') {
+        // Escape quotes by doubling them
+        value = `"${value.replace(/"/g, '""')}"`;
+      }
+      return value;
+    });
+    csvRows.push(values.join(','));
+  }
+  return csvRows.join('\r\n');
+}
+
+// --- IPC HANDLER: EXPORT DATA TO CSV ---
+ipcMain.handle('export-data', async (event, reportType) => {
+  let data;
+  let sql;
+
+  // 1. Prepare SQL query based on the selected report
+  try {
+    switch (reportType) {
+      case 'costumes':
+        sql = `
+          SELECT 
+            costume_ID, 
+            costume_Name, 
+            costume_Origin, 
+            costume_Type, 
+            costume_Size, 
+            costume_Gender, 
+            costume_Price, 
+            costume_Inclusion, 
+            costume_Available 
+          FROM Costume
+        `;
+        data = db.prepare(sql).all();
+        break;
+      case 'clients':
+        sql = 'SELECT * FROM Client';
+        data = db.prepare(sql).all();
+        break;
+      case 'rents_history':
+        sql = `
+          SELECT R.rent_ID, R.rentDate, R.returnDate, R.costume_Returned,
+                 C.costume_Name, CL.client_Name, T.balance, E.event_Name
+          FROM Rents R
+          LEFT JOIN Costume C ON R.costume_ID = C.costume_ID
+          LEFT JOIN Transactions T ON R.transaction_ID = T.transaction_ID
+          LEFT JOIN Client CL ON T.client_ID = CL.client_ID
+          LEFT JOIN Event E ON R.event_ID = E.event_ID
+          ORDER BY R.rentDate DESC
+        `;
+        data = db.prepare(sql).all();
+        break;
+      case 'payments':
+        sql = `
+          SELECT P.payment_ID, P.payment_Date, P.payment_Amount, P.payment_Remarks,
+                 CL.client_Name, T.balance
+          FROM Payment P
+          LEFT JOIN Transactions T ON P.transaction_ID = T.transaction_ID
+          LEFT JOIN Client CL ON T.client_ID = CL.client_ID
+          ORDER BY P.payment_Date DESC
+        `;
+        data = db.prepare(sql).all();
+        break;
+      default:
+        return { success: false, error: 'Invalid report type' };
+    }
+
+    if (data.length === 0) {
+      return { success: false, error: 'No data to export for this report.' };
+    }
+
+    // 2. Convert data to CSV
+    const csvData = jsonToCsv(data);
+
+    // 3. Show Save Dialog
+    const timestamp = new Date().toISOString().split('T')[0];
+    const result = await dialog.showSaveDialog({
+      title: 'Save Data Export',
+      defaultPath: `cms_export_${reportType}_${timestamp}.csv`,
+      filters: [{ name: 'CSV File', extensions: ['csv'] }]
+    });
+
+    if (result.canceled || !result.filePath) {
+      return { success: false, message: 'Export canceled.' };
+    }
+
+    // 4. Write File
+    await fsPromises.writeFile(result.filePath, '\uFEFF' + csvData, 'utf-8');
+    return { success: true, message: `Data exported to ${result.filePath}` };
+
+  } catch (error) {
+    console.error("Export Error:", error.message);
+    return { success: false, error: error.message };
+  }
+});
+
+// --- IPC HANDLER: RESTORE DATABASE ---
+ipcMain.handle('restore-db', async (event) => {
+  // 1. Show Open Dialog
+  const result = await dialog.showOpenDialog({
+    title: 'Select Database Backup to Restore',
+    properties: ['openFile'],
+    filters: [{ name: 'SQLite Database', extensions: ['db'] }]
+  });
+
+  if (result.canceled || !result.filePaths || result.filePaths.length === 0) {
+    return { success: false, message: 'Restore canceled.' };
+  }
+
+  const backupPath = result.filePaths[0];
+  const dbPath = path.join(__dirname, 'db', 'cms.db'); // Your active DB path
+
+  try {
+    // 2. CRITICAL: Close the active database connection
+    db.close();
+
+    // 3. Overwrite the current DB with the backup file
+    await fsPromises.copyFile(backupPath, dbPath);
+
+    // 4. Relaunch the application to re-establish the DB connection
+    app.relaunch();
+    app.exit(0); // Exit the current instance
+
+    return { success: true }; // This might not be sent if app exits too fast
+  } catch (error) {
+    console.error("Restore failed:", error);
+    // If it fails, we must restart the app anyway
+    app.relaunch();
+    app.exit(0);
+    return { success: false, error: error.message };
+  }
+});
+

@@ -116,7 +116,6 @@ function Clients({ showNotification }) { // Accept showNotification prop
 
               <div className="client-actions">
                 <button className="edit-btn button" onClick={() => handleEdit(client)}>Edit Details</button>
-                <button className="payments-btn button" onClick={() => console.log('Go to payments page')}>Payments</button>
                 <button className="charge-btn button" onClick={() => handleCharge(client)}>Charge</button>
               </div>
             </div>

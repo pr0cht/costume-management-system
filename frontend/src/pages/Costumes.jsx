@@ -14,6 +14,7 @@ const bufferToURL = (base64String) => {
 function Costumes({ showNotification, setPage }) {
   const [filterOpen, setFilterOpen] = useState(false);
   const [costumes, setCostumes] = useState([]);
+  const [available, setAvailable] = useState(true)
   const [isLoading, setIsLoading] = useState(true);
   const [editingCostume, setEditingCostume] = useState(null);
   const [rentingCostume, setRentingCostume] = useState(null);
@@ -66,7 +67,7 @@ function Costumes({ showNotification, setPage }) {
   return (
     <div className="page costumes">
       <div className="costumes-topbar">
-        <AddCostumePopup  showNotification={showNotification} onCostumeAdded={fetchCostumes}/>
+        <AddCostumePopup showNotification={showNotification} onCostumeAdded={fetchCostumes} />
         <input
           type="text"
           className="costumes-search"
@@ -155,41 +156,56 @@ function Costumes({ showNotification, setPage }) {
       )}
       <div className="costumes-grid">
         {costumes.map((costume) => {
-              const isRented = !costume.costume_Available;
-              
-              return (
-            <div 
-                className={`costume-item ${isRented ? 'is-rented' : ''}`} 
-                key={costume.costume_ID}
-              >
-              <div className="costume-thumbnail small">
-                <img src={bufferToURL(costume.costume_Image)} alt={costume.costume_Name} />
-              </div>
-              <p><span className="costume-name">{costume.costume_Name}</span></p>
-              <p>Origin: <span className="costume-origin">{costume.costume_Origin}</span></p>
-              <p>Type: <span className="costume-type">{costume.costume_Type}</span></p>
-              <p>Size: <span className="costume-size">{costume.costume_Size}</span></p>
-              <p>Gender: <span className="costume-gender">{costume.costume_Gender}</span></p>
-              <p>Price: <span className="costume-price">{costume.costume_Price.toFixed(2)}</span></p>
-              <p>Status: <span className="costume-status">{costume.costume_Available ? 'Available' : 'Rented'}</span></p>
-              <div className='costume-actions'>
-                <button 
-                  className="edit-btn button" 
-                  onClick={isRented ? null : () => setEditingCostume(costume)}
-                  disabled={isRented}
-                >
-                    Edit
+          const currentStatus = costume.costume_Available;
+
+          const isAvailable = (currentStatus === 1 || currentStatus === 'Available');
+          const isRentedOut = currentStatus === 'Rented Out';
+          const isMaintenance = currentStatus === 'Unavailable' || currentStatus === 0;
+
+          const isEditDisabled = isRentedOut;
+          const isRentDisabled = !isAvailable;
+
+          let statusText;
+          if (isAvailable) statusText = 'Available';
+          else if (isRentedOut) statusText = 'Rented Out';
+          else if (isMaintenance) statusText = 'Unavailable';
+          else statusText = String(currentStatus);
+
+          const visualClass = currentStatus !== 'Available' ? 'is-unavailable' : '';
+
+          return (
+            <div
+              className={`costume-item ${visualClass}`}
+              key={costume.costume_ID}
+            >
+              <div className="costume-thumbnail small">
+                <img src={bufferToURL(costume.costume_Image)} alt={costume.costume_Name} />
+              </div>
+              <p><span className="costume-name">{costume.costume_Name}</span></p>
+              <p>Origin: <span className="costume-origin">{costume.costume_Origin}</span></p>
+              <p>Type: <span className="costume-type">{costume.costume_Type}</span></p>
+              <p>Size: <span className="costume-size">{costume.costume_Size}</span></p>
+              <p>Gender: <span className="costume-gender">{costume.costume_Gender}</span></p>
+              <p>Price: <span className="costume-price">₱{costume.costume_Price.toFixed(2)}</span></p>
+              <p>Status: <span className="costume-status">{statusText}</span></p>
+              <div className='costume-actions'>
+                <button
+                  className="edit-btn button"
+                  onClick={isEditDisabled ? null : () => setEditingCostume(costume)}
+                  disabled={isEditDisabled}
+                >
+                  Edit
                 </button>
-                <button className="rent-btn button" 
-                  onClick={isRented ? null : () => setRentingCostume(costume)}
-                  disabled={isRented}
-                >
-                    Rent
+                <button className="rent-btn button"
+                  onClick={isRentDisabled ? null : () => setRentingCostume(costume)}
+                  disabled={isRentDisabled}
+                >
+                  Rent
                 </button>
-              </div>
-            </div>
-          );
-        })}
+              </div>
+            </div>
+          );
+        })}
       </div>
       <EditCostumePopup
         costume={editingCostume}

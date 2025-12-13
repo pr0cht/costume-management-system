@@ -5,11 +5,12 @@ function AddCostumePopup({ showNotification, onCostumeAdded }) {
   const [name, setName] = useState("");
   const [origin, setOrigin] = useState("");
   const [type, setType] = useState("Cloth");
-  const [size, setSize] = useState("m");
-  const [gender, setGender] = useState("unisex");
+  const [size, setSize] = useState("MEDIUM");
+  const [gender, setGender] = useState("Unisex");
   const [price, setPrice] = useState("");
   const [inclusions, setInclusions] = useState("");
   const [available, setAvailable] = useState(true);
+  const [Unavailable, setUnavailable] = useState('');
   const [img, setImg] = useState(null);
 
   const [imgPreview, setImgPreview] = useState(null);
@@ -24,7 +25,7 @@ function AddCostumePopup({ showNotification, onCostumeAdded }) {
     setGender("Unisex");
     setPrice("");
     setInclusions("");
-    setAvailable(true);
+    setAvailable("true");
     setImg(null);
     setImgPreview(null);
   };
@@ -38,6 +39,10 @@ function AddCostumePopup({ showNotification, onCostumeAdded }) {
             arrayBuffer = await img.arrayBuffer();
         }
 
+        const status = available 
+        ? 'Available' 
+        : unavailableReason || 'Unavailable';
+
         const costumeData = {
             name: name,
             origin: origin,
@@ -46,7 +51,7 @@ function AddCostumePopup({ showNotification, onCostumeAdded }) {
             gender: gender,
             price: parseFloat(price),
             inclusions: inclusions,
-            available: available,
+            available: status,
             img: arrayBuffer ? Array.from(new Uint8Array(arrayBuffer)) : null,
         }; 
 

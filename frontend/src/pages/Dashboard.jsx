@@ -10,8 +10,11 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Title, Tool
 const barOptions = { /* ... */ };
 const doughnutOptions = { /* ... */ };
 
+const formatCurrency = (value) => `₱${parseFloat(value || 0).toFixed(2)}`;
+const today = new Date().toISOString().split('T')[0];
+
 function Dashboard({ showNotification }) {
-  const [stats, setStats] = useState({ total: 0, available: 0, rented: 0, totalBalanceDue: 0, totalRevenue: 0, });
+  const [stats, setStats] = useState({ total: 0, available: 0, unavailable: 0, rented: 0, totalBalanceDue: 0, totalRevenue: 0, });
   const [lists, setLists] = useState({ returnsDueCount: 0, upcomingEventsList: [], recentRentals: [], recentClients: [], totalClients: 0 });
   const [isLoading, setIsLoading] = useState(true);
 
@@ -27,8 +30,16 @@ function Dashboard({ showNotification }) {
 
   const fetchDashboardData = useCallback(async () => {
     setIsLoading(true);
-    let finalStats = {};
-    let finalLists = {};
+    let finalStats = { 
+        total: 0, available: 0, unavailable: 0, rented: 0, 
+        totalBalanceDue: 0, totalRevenue: 0, totalClients: 0 
+    };
+    let finalLists = { 
+        returnsDueCount: 0, 
+        upcomingEventsList: [], 
+        recentRentals: [], 
+        recentClients: [] 
+    };
 
     try {
       const [statsResult, clientsResult, listsResult] = await Promise.all([
@@ -51,17 +62,6 @@ function Dashboard({ showNotification }) {
         finalLists = { ...finalLists, ...listsResult.data };
       }
 
-      if (finalLists.returnsDueCount > 0) {
-        showNotification(`ATTENTION: ${finalLists.returnsDueCount} costumes are due today!`, 'error');
-      }
-      if (finalLists.upcomingEventsList.length > 0) {
-        showNotification(`${finalLists.upcomingEventsList.length} events scheduled soon.`, 'error');
-      }
-      if (finalStats.totalBalanceDue > 0) {
-        const currency = formatCurrency(finalStats.totalBalanceDue);
-        showNotification(`Outstanding balance: ${currency}`, 'error');
-      }
-
       setStats(finalStats);
       setLists(finalLists);
 
@@ -73,7 +73,7 @@ function Dashboard({ showNotification }) {
     } finally {
       setIsLoading(false);
     }
-  }, [])
+  }, [showNotification])
 
   useEffect(() => {
     if (typeof window.electronAPI !== 'undefined') {
@@ -81,13 +81,33 @@ function Dashboard({ showNotification }) {
     }
   }, [fetchDashboardData]);
 
+  useEffect(() => {
+    if (isLoading) return;
+
+    if (lists.returnsDueCount > 0 && !dismissedAlerts.returns) {
+      showNotification(`ATTENTION: ${lists.returnsDueCount} costumes are due today!`, 'error');
+      handleDismissAlert('returns'); 
+    }
+
+    if (lists.upcomingEventsList?.length > 0 && !dismissedAlerts.events) {
+      showNotification(`${lists.upcomingEventsList.length} events scheduled soon.`, 'error');
+      handleDismissAlert('events');
+    }
+
+    if (stats.totalBalanceDue > 0 && !dismissedAlerts.balance) {
+      const currency = formatCurrency(stats.totalBalanceDue);
+      showNotification(`Outstanding balance: ${currency}`, 'error');
+      handleDismissAlert('balance'); 
+    }
+  }, [lists, stats, isLoading, dismissedAlerts, showNotification]);
+
   const doughnutData = {
-    labels: ['Available', 'Rented'],
+    labels: ['Available', 'Unavailable', 'Rented'],
     datasets: [
       {
         label: 'Costumes',
-        data: [stats.available, stats.rented],
-        backgroundColor: ['#28a745', '#7E001B'],
+        data: [stats.available, stats.unavailable, stats.rented],
+        backgroundColor: ['#28a745', '#929292ff', '#960f2cff'],
         borderWidth: 1,
       },
     ],
@@ -125,6 +145,10 @@ function Dashboard({ showNotification }) {
               <div>
                 <h1>Available</h1>
                 <p>{stats.available}</p>
+              </div>
+              <div>
+                <h1>Unavailable</h1>
+                <p>{stats.unavailable}</p>
               </div>
               <div>
                 <h1>Currently Rented</h1>

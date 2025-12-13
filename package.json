@@ -7,20 +7,23 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "rebuild": "electron-rebuild",
     "start": "electron .",
-    "build": "electron-builder"
+    "package": "electron-forge package",
+    "make": "electron-forge make"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/pr0cht/costume-management-system.git"
   },
   "keywords": [],
-  "author": "",
+  "author": "procht",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/pr0cht/costume-management-system/issues"
   },
   "homepage": "https://github.com/pr0cht/costume-management-system#readme",
   "devDependencies": {
+    "@electron-forge/cli": "^7.4.0",
+    "@electron-forge/maker-squirrel": "^7.4.0",
     "electron": "^37.2.0",
     "electron-builder": "^24.6.4",
     "electron-rebuild": "^3.2.9"
@@ -28,22 +31,9 @@
   "dependencies": {
     "better-sqlite3": "^12.2.0",
     "chart.js": "^4.5.0",
+    "electron-squirrel-startup": "^1.0.1",
     "react": "^19.1.1",
     "react-chartjs-2": "^5.3.0",
     "react-dom": "^19.1.1"
-  },
-  "build": {
-    "appId": "com.procht.costumemanagementsystem",
-    "productName": "Costume Management System",
-    "files": [
-      "frontend/dist/**/*",
-      "db/**/*",
-      "main.js",
-      "preload.js",
-      "package.json"
-    ],
-    "win": {
-      "icon": "cms_icon.ico"
-    }
   }
 }

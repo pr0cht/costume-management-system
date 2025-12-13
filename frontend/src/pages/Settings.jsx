@@ -1,166 +1,149 @@
-function Settings() {
+import React, { useState } from 'react';
+import AppNotification from './alerts/Notification';
+import ConfirmationModal from './alerts/ConfirmationModal';
+
+function Settings({ showNotification }) {
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [modalAction, setModalAction] = useState(null); // 'delete' or 'restore'
+
+  const [dateFormat, setDateFormat] = useState('mmddyyyy');
+  const [enableEmail, setEnableEmail] = useState(true);
+  const [enableSMS, setEnableSMS] = useState(true);
+  const [exportType, setExportType] = useState('costumes');
+
+  const handleSaveSettings = () => {
+    showNotification("Settings saved successfully!", 'success');
+  };
+
+  const handleBackupDb = async () => {
+    const result = await window.electronAPI.exportDb();
+    if (result.success) {
+      showNotification(result.message, 'success');
+    } else {
+      showNotification(`Export Failed: ${result.error || result.message}`, 'error');
+    }
+  };
+
+  const handleStartRestoreDb = () => {
+    setModalAction('restore');
+    setShowConfirmModal(true);
+  };
+
+  const handleStartDeleteDb = () => {
+    setModalAction('delete');
+    setShowConfirmModal(true);
+  };
+
+  const handleConfirmAction = async () => {
+    const action = modalAction;
+    setShowConfirmModal(false);
+    setModalAction(null);
+
+    if (action === 'delete') {
+      try {
+        const result = await window.electronAPI.deleteAllData();
+        if (result.success) {
+          showNotification("Database truncated successfully. App will restart.", 'success');
+        } else {
+          showNotification(`Failed to delete database: ${result.error}`, 'error');
+        }
+      } catch (error) {
+        showNotification(`Fatal error during deletion: ${error.message}`, 'error');
+      }
+    }
+
+    if (action === 'restore') {
+      try {
+        const result = await window.electronAPI.restoreDb();
+        if (result.success) {
+          showNotification("Restoring database... App will restart.", 'success');
+        } else {
+          showNotification(`Restore failed: ${result.error || result.message}`, 'error');
+        }
+      } catch (error) {
+        showNotification(`Fatal error during restore: ${error.message}`, 'error');
+      }
+    }
+  };
+
+  const handleExport = async () => {
+    showNotification(`Exporting ${exportType} data...`, 'success');
+    
+    const result = await window.electronAPI.exportData(exportType);
+    
+    if (result.success) {
+      showNotification(result.message, 'success');
+    } else {
+      showNotification(`Export Failed: ${result.error || result.message}`, 'error');
+    }
+  };
+
   return (
     <div className="page settings">
       <h1 className="settings-title">Settings</h1>
-      
+
       <div className="settings-grid">
-        {/* Appearance Section */}
+        {/* --- Database Management Section --- */}
         <div className="settings-section">
-          <h2>Appearance</h2>
+          <h2>Backup & Database</h2>
           <div className="settings-content">
-            <div className="setting-item">
-              <label>Theme</label>
-              <select defaultValue="light">
-                <option value="light">Light</option>
-                <option value="dark">Dark</option>
-                <option value="system">System Default</option>
-              </select>
-            </div>
-            <div className="setting-item">
-              <label>Accent Color</label>
-              <select defaultValue="red">
-                <option value="red">Red</option>
-                <option value="blue">Blue</option>
-                <option value="purple">Purple</option>
-              </select>
-            </div>
-            <div className="setting-item">
-              <label>Font Size</label>
-              <select defaultValue="medium">
-                <option value="small">Small</option>
-                <option value="medium">Medium</option>
-                <option value="large">Large</option>
-              </select>
-            </div>
-          </div>
-        </div>
 
-        {/* System Preferences */}
-        <div className="settings-section">
-          <h2>System Preferences</h2>
-          <div className="settings-content">
             <div className="setting-item">
-              <label>Currency</label>
-              <select defaultValue="php">
-                <option value="php">Philippine Peso (₱)</option>
-                <option value="usd">US Dollar ($)</option>
+              <label>Select Data to Export:</label>
+              <select value={exportType} onChange={(e) => setExportType(e.target.value)}>
+                <option value="costumes">Costumes</option>
+                <option value="clients">Clients</option>
+                <option value="rents_history">Rent History (Full)</option>
+                <option value="payments">Payment History</option>
               </select>
+              <button className="backup-btn button" onClick={handleExport} style={{ marginTop: '10px' }}>
+                Export to CSV
+              </button>
             </div>
-            <div className="setting-item">
-              <label>Date Format</label>
-              <select defaultValue="mmddyyyy">
-                <option value="mmddyyyy">MM/DD/YYYY</option>
-                <option value="ddmmyyyy">DD/MM/YYYY</option>
-                <option value="yyyymmdd">YYYY/MM/DD</option>
-              </select>
-            </div>
-            <div className="setting-item checkbox">
-              <label>
-                <input type="checkbox" defaultChecked />
-                Enable Email Notifications
-              </label>
-            </div>
-            <div className="setting-item checkbox">
-              <label>
-                <input type="checkbox" defaultChecked />
-                Enable SMS Notifications
-              </label>
-            </div>
-          </div>
-        </div>
 
-        {/* Business Information */}
-        <div className="settings-section">
-          <h2>Business Information</h2>
-          <div className="settings-content">
-            <div className="setting-item">
-              <label>Business Name</label>
-              <input type="text" defaultValue="Davao Cosplay Shop" />
-            </div>
-            <div className="setting-item">
-              <label>Contact Number</label>
-              <input type="tel" placeholder="+63 XXX XXX XXXX" />
-            </div>
-            <div className="setting-item">
-              <label>Email Address</label>
-              <input type="email" placeholder="contact@example.com" />
-            </div>
-            <div className="setting-item">
-              <label>Business Address</label>
-              <textarea placeholder="Enter business address"></textarea>
-            </div>
-          </div>
-        </div>
+            <hr style={{ border: '1px solid #eee' }} />
 
-        {/* Rental Settings */}
-        <div className="settings-section">
-          <h2>Rental Settings</h2>
-          <div className="settings-content">
             <div className="setting-item">
-              <label>Default Rental Duration (Days)</label>
-              <input type="number" defaultValue="3" min="1" />
+              <label>Backup Entire Database (Single File):</label>
+              <button className="backup-btn button" onClick={handleBackupDb}>
+                Save .db Backup
+              </button>
             </div>
-            <div className="setting-item">
-              <label>Late Fee (per day)</label>
-              <input type="number" defaultValue="100" min="0" />
-            </div>
-            <div className="setting-item checkbox">
-              <label>
-                <input type="checkbox" defaultChecked />
-                Require Deposit
-              </label>
-            </div>
-            <div className="setting-item">
-              <label>Default Deposit Amount</label>
-              <input type="number" defaultValue="1000" min="0" />
-            </div>
-          </div>
-        </div>
 
-        {/* Backup & Security */}
-        <div className="settings-section">
-          <h2>Backup & Security</h2>
-          <div className="settings-content">
             <div className="setting-item">
-              <label>Auto-Backup Frequency</label>
-              <select defaultValue="daily">
-                <option value="daily">Daily</option>
-                <option value="weekly">Weekly</option>
-                <option value="monthly">Monthly</option>
-              </select>
+              <label>Restore from Backup:</label>
+              <button className="restore-btn button" onClick={handleStartRestoreDb}>
+                Restore from .db File...
+              </button>
             </div>
-            <div className="setting-item">
-              <button className="backup-btn button">Backup Now</button>
-              <button className="restore-btn button">Restore Data</button>
-            </div>
-            <div className="setting-item">
-              <label>Change Password</label>
-              <button className="password-btn button">Update Password</button>
-            </div>
-          </div>
-        </div>
 
-        {/* User Management */}
-        <div className="settings-section">
-          <h2>User Management</h2>
-          <div className="settings-content">
+            <hr style={{ border: '1px solid #eee' }} />
+
             <div className="setting-item">
-              <button className="users-btn button">Manage Users</button>
-            </div>
-            <div className="setting-item">
-              <button className="roles-btn button">Manage Roles</button>
+              <label>Erase All Data:</label>
+              <button className="delete-db-btn button" onClick={handleStartDeleteDb} style={{ backgroundColor: '#E64848' }}>
+                Delete ALL Data (Truncate)
+              </button>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="settings-actions">
-        <button className="save-settings">Save Changes</button>
-        <button className="reset-settings">Reset to Default</button>
-      </div>
+      {/* --- CONFIRMATION MODAL RENDER --- */}
+      {showConfirmModal && (
+        <ConfirmationModal
+          message={
+            modalAction === 'delete'
+              ? "WARNING: This will permanently erase ALL costumes, clients, transactions, and payments. Are you sure?"
+              : "WARNING: This will overwrite the current database with your backup file. The app will restart. Are you sure?"
+          }
+          onConfirm={handleConfirmAction}
+          onCancel={() => setShowConfirmModal(false)}
+          confirmText={modalAction === 'delete' ? "ERASE ALL DATA" : "RESTORE & RESTART"}
+        />
+      )}
     </div>
   );
 }
 
-import React from 'react';
 export default Settings;

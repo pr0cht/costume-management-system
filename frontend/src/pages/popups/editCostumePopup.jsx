@@ -36,7 +36,8 @@ function EditCostumePopup({ costume, onClose, onCostumeUpdated, showNotification
             setGender(costume.costume_Gender || "Unisex");
             setPrice(costume.costume_Price ? costume.costume_Price.toString() : "");
             setInclusions(costume.costume_Inclusion || "");
-            setAvailable(costume.costume_Available === 1);
+            const isCurrentlyAvailable = costume.costume_Available === 1 || costume.costume_Available === 'Available'
+            setAvailable(isCurrentlyAvailable);
             setNewImg(null);
 
             if (costume.costume_Image) {
@@ -71,6 +72,13 @@ function EditCostumePopup({ costume, onClose, onCostumeUpdated, showNotification
                 arrayBuffer = await newImg.arrayBuffer();
             }
 
+            let status;
+            if (costume.costume_Available === 'Rented Out') {
+                status = 'Rented Out';
+            } else {
+                status = available ? 'Available' : 'Unavailable';
+            }
+
             const updatedCostumeData = {
                 id: costume.costume_ID,
                 name,
@@ -80,7 +88,7 @@ function EditCostumePopup({ costume, onClose, onCostumeUpdated, showNotification
                 gender,
                 price: parseFloat(price) || 0,
                 inclusions,
-                available,
+                available: status,
                 img: arrayBuffer,
             };
 
@@ -104,7 +112,7 @@ function EditCostumePopup({ costume, onClose, onCostumeUpdated, showNotification
     };
 
     const handleConfirmDelete = async () => {
-        setShowConfirmModal(false); 
+        setShowConfirmModal(false);
 
         try {
             const result = await window.electronAPI.deleteCostume(costume.costume_ID);
@@ -133,110 +141,116 @@ function EditCostumePopup({ costume, onClose, onCostumeUpdated, showNotification
 
     return (
         <>
-        <div className="popup-overlay">
-            <div className="popup-content">
-                <h2>Edit {costume.costume_Name}</h2>
-                <form className="edit-costume-form form" onSubmit={handleEditCostume}>
-                    <div className="row spacebetween">
-                        {/* costume name */}
-                        <label>Costume Name:</label>
-                        <input className="text-input" type="text" name="costumeName" required
-                            value={name}
-                            onChange={(e) => setName(e.target.value)} />
-                    </div>
-                    <div className="row spacebetween">
-                        {/* costume origin */}
-                        <label>Costume Origin:</label>
-                        <input className="text-input" type="text" name="costumeOrigin" required
-                            value={origin}
-                            onChange={(e) => setOrigin(e.target.value)} />
-                    </div>
-                    <div className="row spacebetween">
-                        {/* costume type */}
-                        <label>Costume Type:</label>
-                        <select className="select-input" name="costumeType" required
-                            value={type}
-                            onChange={(e) => setType(e.target.value)}>
-                            <option value="Cloth">Cloth</option>
-                            <option value="Armor">Armor</option>
-                            <option value="Single Item">Single Item</option>
-                            <option value="Other">Other</option>
-                            <option value="Not Applicable">Not Applicable</option>
-                        </select>
-                    </div>
-                    <div className="row spacebetween">
-                        {/* costume size */}
-                        <label>Size:</label>
-                        <select className="select-input" name="size" required
-                            value={size}
-                            onChange={(e) => setSize(e.target.value)}>
-                            <option value="XSMALL">XS</option>
-                            <option value="SMALL">S</option>
-                            <option value="MEDIUM">M</option>
-                            <option value="LARGE">L</option>
-                            <option value="XLARGE">XL</option>
-                            <option value="XXLARGE">XXL</option>
-                            <option value="One Size">One Size Fits All</option>
-                            <option value="Not Applicable">Not Applicable</option>
-                        </select>
-                    </div>
-                    <div className="row spacebetween">
-                        {/* costume gender */}
-                        <label>Gender:</label>
-                        <select className="select-input" name="gender" required
-                            value={gender}
-                            onChange={(e) => setGender(e.target.value)}>
-                            <option value="Male">Male</option>
-                            <option value="Female">Female</option>
-                            <option value="Unisex">Unisex</option>
-                            <option value="Not Applicable">Not Applicable</option>
-                        </select>
-                    </div>
-                    <div className="row spacebetween">
-                        {/* costume price */}
-                        <label>Price:</label>
-                        <input className="text-input" type="number" name="price" min="0" step="0.01" required
-                            value={price}
-                            onChange={(e) => setPrice(e.target.value)} />
-                    </div>
-                    <div className="row spacebetween">
-                        {/* costume inclusions */}
-                        <label>Inclusions:</label>
-                        <input className="text-input" type="text" name="inclusions"
-                            value={inclusions}
-                            onChange={(e) => setInclusions(e.target.value)} />
-                    </div>
-                    <div className="row spacebetween">
-                        {/* costume availability */}
-                        <label>Available:</label>
-                        <input className="checkbox checkbox-input" type="checkbox" name="available"
-                            checked={available}
-                            onChange={(e) => setAvailable(e.target.checked)} />
-                    </div>
-                    <div className="row spacebetween">
-                        {/* costume image */}
-                        <label>Reference Image:</label>
-                        <input type="file" name="referenceImage" accept="image/*"
-                            onChange={handleImageChange} />
-                    </div>
-
-                    {/* image preview */}
-                    {imgPreview && (
+            <div className="popup-overlay">
+                <div className="popup-content">
+                    <h2>Edit {costume.costume_Name}</h2>
+                    <form className="edit-costume-form form" onSubmit={handleEditCostume}>
                         <div className="row spacebetween">
-                            <figure>
-                                <figcaption>Image Preview:</figcaption>
-                                <img className="costume-thumbnail large" src={imgPreview} alt="Image Preview" style={{ width: '100px', height: '100px', objectFit: 'cover' }} />
-                            </figure>
+                            {/* costume name */}
+                            <label>Costume Name:</label>
+                            <input className="text-input" type="text" name="costumeName" required
+                                value={name}
+                                onChange={(e) => setName(e.target.value)} />
                         </div>
-                    )}
-                    <div className="form-actions row spacebetween">
-                        <button className="button" type="submit">Save Changes</button>
-                        <button className="button" type="button" onClick={onClose}>Cancel</button>
-                        <button className="button" type="button" onClick={handleStartDelete}><img className="icon" src="assets/delete.png" /></button>
-                    </div>
-                </form>
+                        <div className="row spacebetween">
+                            {/* costume origin */}
+                            <label>Costume Origin:</label>
+                            <input className="text-input" type="text" name="costumeOrigin" required
+                                value={origin}
+                                onChange={(e) => setOrigin(e.target.value)} />
+                        </div>
+                        <div className="row spacebetween">
+                            {/* costume type */}
+                            <label>Costume Type:</label>
+                            <select className="select-input" name="costumeType" required
+                                value={type}
+                                onChange={(e) => setType(e.target.value)}>
+                                <option value="Cloth">Cloth</option>
+                                <option value="Armor">Armor</option>
+                                <option value="Single Item">Single Item</option>
+                                <option value="Other">Other</option>
+                                <option value="Not Applicable">Not Applicable</option>
+                            </select>
+                        </div>
+                        <div className="row spacebetween">
+                            {/* costume size */}
+                            <label>Size:</label>
+                            <select className="select-input" name="size" required
+                                value={size}
+                                onChange={(e) => setSize(e.target.value)}>
+                                <option value="XSMALL">XS</option>
+                                <option value="SMALL">S</option>
+                                <option value="MEDIUM">M</option>
+                                <option value="LARGE">L</option>
+                                <option value="XLARGE">XL</option>
+                                <option value="XXLARGE">XXL</option>
+                                <option value="One Size">One Size Fits All</option>
+                                <option value="Not Applicable">Not Applicable</option>
+                            </select>
+                        </div>
+                        <div className="row spacebetween">
+                            {/* costume gender */}
+                            <label>Gender:</label>
+                            <select className="select-input" name="gender" required
+                                value={gender}
+                                onChange={(e) => setGender(e.target.value)}>
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                                <option value="Unisex">Unisex</option>
+                                <option value="Not Applicable">Not Applicable</option>
+                            </select>
+                        </div>
+                        <div className="row spacebetween">
+                            {/* costume price */}
+                            <label>Price:</label>
+                            <input className="text-input" type="number" name="price" min="0" step="0.01" required
+                                value={price}
+                                onChange={(e) => setPrice(e.target.value)} />
+                        </div>
+                        <div className="row spacebetween">
+                            {/* costume inclusions */}
+                            <label>Inclusions:</label>
+                            <input className="text-input" type="text" name="inclusions"
+                                value={inclusions}
+                                onChange={(e) => setInclusions(e.target.value)} />
+                        </div>
+                        {costume.costume_Available === 'Rented Out' ? (
+                            <div className="row spacebetween">
+                                <label>Status:</label>
+                                <p style={{ color: '#E64848', fontWeight: 'bold' }}>CURRENTLY RENTED OUT</p>
+                            </div>
+                        ) : (
+                            <div className="row spacebetween">
+                                <label>Available:</label>
+                                <input className="checkbox checkbox-input" type="checkbox" name="available"
+                                    checked={available}
+                                    onChange={(e) => setAvailable(e.target.checked)} />
+                            </div>
+                        )}
+                        <div className="row spacebetween">
+                            {/* costume image */}
+                            <label>Reference Image:</label>
+                            <input type="file" name="referenceImage" accept="image/*"
+                                onChange={handleImageChange} />
+                        </div>
+
+                        {/* image preview */}
+                        {imgPreview && (
+                            <div className="row spacebetween">
+                                <figure>
+                                    <figcaption>Image Preview:</figcaption>
+                                    <img className="costume-thumbnail large" src={imgPreview} alt="Image Preview" style={{ width: '100px', height: '100px', objectFit: 'cover' }} />
+                                </figure>
+                            </div>
+                        )}
+                        <div className="form-actions row spacebetween">
+                            <button className="button" type="submit">Save Changes</button>
+                            <button className="button" type="button" onClick={onClose}>Cancel</button>
+                            <button className="button" type="button" onClick={handleStartDelete}><img className="icon" src="assets/delete.png" /></button>
+                        </div>
+                    </form>
+                </div>
             </div>
-        </div>
             {showConfirmModal && (
                 <ConfirmationModal
                     message={`Are you sure you want to permanently delete the costume "${costume.costume_Name}"? This action cannot be undone.`}

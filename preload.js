@@ -35,4 +35,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
   getGeneralStats: () => ipcRenderer.invoke('get-general-stats'),
   getDashboardLists: () => ipcRenderer.invoke('get-dashboard-lists'),
   getRecentClients: () => ipcRenderer.invoke('get-recent-clients'),
+
+  deleteAllData: () => ipcRenderer.invoke('delete-all-data'),
+  exportDb: () => ipcRenderer.invoke('export-db'),
+  exportData: (reportType) => ipcRenderer.invoke('export-data', reportType),
+  restoreDb: () => ipcRenderer.invoke('restore-db'),
 });

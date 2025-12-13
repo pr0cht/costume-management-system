@@ -176,7 +176,8 @@ function NewRentalPopup({ initialCostume, onClose, onRentalProcessed, showNotifi
                       if (clientsResult.success) setAllClients(clientsResult.data);
                       setView('selectClient'); 
                     }}
-                    onCancel={() => setView('selectClient')} 
+                    onCancel={() => setView('selectClient')}
+                    showNotification={showNotification}
                   />
                 )
               )}
